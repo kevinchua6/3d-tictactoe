@@ -11,20 +11,41 @@
 	<body>
 		<script src="js/three.js"></script>
 		<script>
-			// Our Javascript will go here.
+			// Get a reference to the container that will hold our scene (this will be the entire window)
+			const container = document.body
+
+			//create a scene
 			var scene = new THREE.Scene();
-			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+			//Set the background color
+			scene.background = new THREE.Color('skyblue');
+
+			// Create a Camera
+			const fov = 75; // AKA Field of View
+			const aspect = window.innerWidth / window.innerHeight;
+			const near = 0.1; // the near clipping plane
+			const far = 1000; // the far clipping plane
+
+			const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
 			
+			//create the renderer
 			var renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight);
-			document.body.appendChild(renderer.domElement);
+			// For mobile to be clearer
+			renderer.setPixelRatio (window.devicePixelRatio);
 
-			var geometry = new THREE.BoxGeometry( 1,1,1 );
-			var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+			container.appendChild(renderer.domElement);
+			//create a geometry
+			var geometry = new THREE.BoxBufferGeometry( 2, 2, 2 );
+			//create a basic material 
+			var material = new THREE.MeshBasicMaterial();
+
+			//create a mesh containing geometry and material
 			var cube = new THREE.Mesh( geometry, material );
 			scene.add( cube );
 
-			camera.position.z = 5;
+			
+			camera.position.set( 0, 0, 4 );
 
 			var speed = 0.05;
 
