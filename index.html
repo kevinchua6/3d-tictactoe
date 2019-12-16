@@ -21,6 +21,7 @@
 			let isRightKeyDown;
 			let isUpKeyDown;
 			let isDownKeyDown;
+			let wireframe;
 
 			function init() {
 				// Get a reference to the container that will hold our scene (this will be the entire window)
@@ -52,12 +53,19 @@
 				//create a geometry
 				const geometry = new THREE.BoxBufferGeometry( 2, 2, 2 );
 				//create a basic material thats white
-				const material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
+				const material = new THREE.MeshStandardMaterial( { color: 0xffffff} );
 
 				//create a mesh containing geometry and material
 				cube = new THREE.Mesh( geometry, material );
 
 				scene.add( cube );
+
+				//Add the wireframe
+				const geometry2 = new THREE.EdgesGeometry( cube.geometry);
+				const material2 = new THREE.LineBasicMaterial( { color: 0x000000 } ); //black
+				wireframe = new THREE.LineSegments( geometry2, material2 );
+				scene.add(wireframe)
+				
 
 				//Create a directional light
 				const light = new THREE.DirectionalLight( 0xffffff, 5.0 );
@@ -68,7 +76,7 @@
 				//Add light to scene
 				scene.add( light );
 
-				
+
 
 				
 				
@@ -91,15 +99,19 @@
 			function handleKeys() {
 				if (isLeftKeyDown == true) {
 					cube.rotation.y -= speed;
+					wireframe.rotation.y -= speed;
 				}
 				if (isRightKeyDown == true) {
 					cube.rotation.y += speed;
+					wireframe.rotation.y += speed;
 				}
 				if (isUpKeyDown == true) {
 					cube.rotation.x -= speed;
+					wireframe.rotation.x -= speed;
 				}
 				if (isDownKeyDown == true) {
 					cube.rotation.x += speed;
+					wireframe.rotation.x += speed;
 				}
 			};
 
