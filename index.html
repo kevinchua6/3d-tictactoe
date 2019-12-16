@@ -11,48 +11,55 @@
 	<body>
 		<script src="js/three.js"></script>
 		<script>
-			// Get a reference to the container that will hold our scene (this will be the entire window)
-			const container = document.body
+			let container;
+			let camera;
+			let renderer;
+			let scene;
+			let cube;
+			let speed = 0.05;
+			let isLeftKeyDown;
+			let isRightKeyDown;
+			let isUpKeyDown;
+			let isDownKeyDown;
 
-			//create a scene
-			var scene = new THREE.Scene();
+			function init() {
+				// Get a reference to the container that will hold our scene (this will be the entire window)
+				container = document.body
 
-			//Set the background color
-			scene.background = new THREE.Color('skyblue');
+				//create a scene
+				scene = new THREE.Scene();
 
-			// Create a Camera
-			const fov = 75; // AKA Field of View
-			const aspect = window.innerWidth / window.innerHeight;
-			const near = 0.1; // the near clipping plane
-			const far = 1000; // the far clipping plane
+				//Set the background color
+				scene.background = new THREE.Color('skyblue');
 
-			const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
-			
-			//create the renderer
-			var renderer = new THREE.WebGLRenderer();
-			renderer.setSize( window.innerWidth, window.innerHeight);
-			// For mobile to be clearer
-			renderer.setPixelRatio (window.devicePixelRatio);
+				// Create a Camera
+				const fov = 75; // AKA Field of View
+				const aspect = window.innerWidth / window.innerHeight;
+				const near = 0.1; // the near clipping plane
+				const far = 1000; // the far clipping plane
 
-			container.appendChild(renderer.domElement);
-			//create a geometry
-			var geometry = new THREE.BoxBufferGeometry( 2, 2, 2 );
-			//create a basic material 
-			var material = new THREE.MeshBasicMaterial();
+				camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+				
+				//create the renderer
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight);
+				// For mobile to be clearer
+				renderer.setPixelRatio (window.devicePixelRatio);
 
-			//create a mesh containing geometry and material
-			var cube = new THREE.Mesh( geometry, material );
-			scene.add( cube );
+				container.appendChild(renderer.domElement);
+				//create a geometry
+				const geometry = new THREE.BoxBufferGeometry( 2, 2, 2 );
+				//create a basic material 
+				const material = new THREE.MeshBasicMaterial();
 
-			
-			camera.position.set( 0, 0, 4 );
+				//create a mesh containing geometry and material
+				cube = new THREE.Mesh( geometry, material );
 
-			var speed = 0.05;
+				scene.add( cube );
 
-			var isLeftKeyDown;
-			var isRightKeyDown;
-			var isUpKeyDown;
-			var isDownKeyDown;
+				
+				camera.position.set( 0, 0, 4 );
+			}
 
 			function animate() {
 				requestAnimationFrame( animate );
@@ -61,7 +68,10 @@
 				// cube.rotation.x += 0.01;
 				// cube.rotation.y += 0.01;
 			};
-
+			
+			//Set everything up
+			init()
+			//Animate it
 			animate();
 
 
