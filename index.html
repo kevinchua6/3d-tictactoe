@@ -52,7 +52,7 @@
 				//create a geometry
 				const geometry = new THREE.BoxBufferGeometry( 2, 2, 2 );
 				//create a basic material thats white
-				const material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
+				const material = new THREE.MeshStandardMaterial( { color: 0xffffff, transparent: true, opacity: 0.5} );
 
 				//create a mesh containing geometry and material
 				cube = new THREE.Mesh( geometry, material );
