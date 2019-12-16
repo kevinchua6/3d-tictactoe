@@ -16,7 +16,7 @@
 			let renderer;
 			let scene;
 			let cube;
-			let speed = 0.05;
+			let speed = 0.03;
 			let isLeftKeyDown;
 			let isRightKeyDown;
 			let isUpKeyDown;
@@ -33,15 +33,17 @@
 				scene.background = new THREE.Color('skyblue');
 
 				// Create a Camera
-				const fov = 75; // AKA Field of View
+				const fov = 35; // AKA Field of View
 				const aspect = window.innerWidth / window.innerHeight;
 				const near = 0.1; // the near clipping plane
-				const far = 1000; // the far clipping plane
+				const far = 100; // the far clipping plane
 
 				camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+
+				camera.position.set( 0, 0, 7 );
 				
-				//create the renderer
-				renderer = new THREE.WebGLRenderer();
+				//Create a WebGLRenderer and set its width and height
+				renderer = new THREE.WebGLRenderer( {antialias: true} );
 				renderer.setSize( window.innerWidth, window.innerHeight);
 				// For mobile to be clearer
 				renderer.setPixelRatio (window.devicePixelRatio);
@@ -49,16 +51,27 @@
 				container.appendChild(renderer.domElement);
 				//create a geometry
 				const geometry = new THREE.BoxBufferGeometry( 2, 2, 2 );
-				//create a basic material 
-				const material = new THREE.MeshBasicMaterial();
+				//create a basic material thats white
+				const material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
 
 				//create a mesh containing geometry and material
 				cube = new THREE.Mesh( geometry, material );
 
 				scene.add( cube );
 
+				//Create a directional light
+				const light = new THREE.DirectionalLight( 0xffffff, 5.0 );
+
+				//move the light back and up a bit
+				light.position.set( 10, 10, 10);
+
+				//Add light to scene
+				scene.add( light );
+
 				
-				camera.position.set( 0, 0, 4 );
+
+				
+				
 			}
 
 			function animate() {
@@ -68,7 +81,7 @@
 				// cube.rotation.x += 0.01;
 				// cube.rotation.y += 0.01;
 			};
-			
+
 			//Set everything up
 			init()
 			//Animate it
