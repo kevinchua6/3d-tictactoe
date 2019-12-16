@@ -15,13 +15,14 @@
 			let camera;
 			let renderer;
 			let scene;
-			let cube;
+
+			let cubes = {};
+
 			let speed = 0.03;
 			let isLeftKeyDown;
 			let isRightKeyDown;
 			let isUpKeyDown;
 			let isDownKeyDown;
-			let wireframe;
 
 			function init() {
 				// Get a reference to the container that will hold our scene (this will be the entire window)
@@ -48,36 +49,49 @@
 				renderer.setSize( window.innerWidth, window.innerHeight);
 				// For mobile to be clearer
 				renderer.setPixelRatio (window.devicePixelRatio);
-
 				container.appendChild(renderer.domElement);
-				//create a geometry
-				const geometry = new THREE.BoxBufferGeometry( 2, 2, 2 );
-				//create a basic material thats white
 
-				const material = new THREE.MeshStandardMaterial( { color: 0xffffff, transparent: true, opacity: 0.5} );
-
-				//create a mesh containing geometry and material
-				cube = new THREE.Mesh( geometry, material );
-
-				scene.add( cube );
-
-				//Add the wireframe
-				const geometry2 = new THREE.EdgesGeometry( cube.geometry);
-				const material2 = new THREE.LineBasicMaterial( { color: 0x000000 } ); //black
-				wireframe = new THREE.LineSegments( geometry2, material2 );
-				scene.add(wireframe)
+				
+				cubes.bigCube = createCube(2, 0, 0, 0);
+				
+				
 				
 
 				//Create a directional light
 				const light = new THREE.DirectionalLight( 0xffffff, 5.0 );
 
-				//move the light back and up a bit
+				//Move the light back and up a bit
 				light.position.set( 10, 10, 10);
 
 				//Add light to scene
 				scene.add( light );
 
+				function createCube(length, posx, posy, posz){
+					//create a geometry
+					const geometry = new THREE.BoxBufferGeometry( length, length, length );
+					//create a basic material thats white
+					const material = new THREE.MeshStandardMaterial( { 
+						color: 0xffffff, transparent: true, 
+						opacity: 0.5, 
+						polygonOffset: true,
+						polygonOffsetFactor: 1, // positive value pushes polygon further away
+						polygonOffsetUnits: 1
+					} );
+					//create a mesh containing geometry and material
+					const cube = new THREE.Mesh( geometry, material );
+					cube.position.x = posx;
+					cube.position.y = posy;
+					cube.position.z = posz;
+					scene.add( cube );
 
+					//Add the wireframe
+					const geometryWR = new THREE.EdgesGeometry( cube.geometry);
+					const materialWR = new THREE.LineBasicMaterial( { color: 0x000000 } ); //black
+					const wireframe = new THREE.LineSegments( geometryWR, materialWR );
+					cube.add(wireframe)
+
+					return (cube);
+				}
 
 				
 				
@@ -87,8 +101,6 @@
 				requestAnimationFrame( animate );
 				renderer.render( scene, camera);
 				handleKeys();
-				// cube.rotation.x += 0.01;
-				// cube.rotation.y += 0.01;
 			};
 
 			//Set everything up
@@ -99,20 +111,16 @@
 
 			function handleKeys() {
 				if (isLeftKeyDown == true) {
-					cube.rotation.y -= speed;
-					wireframe.rotation.y -= speed;
+					cubes.bigCube.rotation.y -= speed;
 				}
 				if (isRightKeyDown == true) {
-					cube.rotation.y += speed;
-					wireframe.rotation.y += speed;
+					cubes.bigCube.rotation.y += speed;
 				}
 				if (isUpKeyDown == true) {
-					cube.rotation.x -= speed;
-					wireframe.rotation.x -= speed;
+					cubes.bigCube.rotation.x -= speed;
 				}
 				if (isDownKeyDown == true) {
-					cube.rotation.x += speed;
-					wireframe.rotation.x += speed;
+					cubes.bigCube.rotation.x += speed;
 				}
 			};
 
