@@ -25,6 +25,11 @@
 			let isUpKeyDown;
 			let isDownKeyDown;
 
+			//Set everything up
+			init()
+			//Animate it
+			animate();
+
 			function init() {
 				// Get a reference to the container that will hold our scene (this will be the entire window)
 				container = document.body
@@ -67,8 +72,6 @@
 					bigCube.add(cube);
 				}
 				
-				
-				
 
 				//Create a directional light
 				const light = new THREE.DirectionalLight( 0xffffff, 5.0 );
@@ -78,6 +81,9 @@
 
 				//Add light to scene
 				scene.add( light );
+				
+
+
 
 				function createCube(length, posx, posy, posz){
 					//create a geometry
@@ -138,9 +144,77 @@
 					return (wireframe);
 				}
 
+				document.addEventListener("keydown", function(event) {
+					event.preventDefault();
+					const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
+					
+					switch (key) { // change to event.key to key to use the above variable
+						case "a":
+						case "ArrowLeft":{ 
+							// Left pressed
+							isLeftKeyDown = true;
+							//console.log('left pressed');
+							break;
+						}
+						case "d":
+						case "ArrowRight": {
+							// Right pressed
+							isRightKeyDown = true;
+							//console.log('right pressed');
+							break;
+						}
+						case "w":
+						case "ArrowUp": {
+							// Up pressed
+							isUpKeyDown = true;
+							//console.log('up pressed');
+							break;
+						}
+						case "s":
+						case "ArrowDown": {
+							// Down pressed
+							isDownKeyDown = true;
+							//console.log('down pressed');
+							break;
+						}
+					}
+				});
 
-				
-				
+				document.addEventListener("keyup", function(event) {
+					event.preventDefault();
+					const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
+					
+					switch (key) { // change to event.key to key to use the above variable
+						case "a":
+						case "ArrowLeft":{ 
+							// Left pressed
+							isLeftKeyDown = false;
+							//console.log('left released');
+							break;
+						}
+						case "d":
+						case "ArrowRight": {
+							// Right pressed
+							isRightKeyDown = false;
+							//console.log('right released');
+							break;
+						}
+						case "w":
+						case "ArrowUp": {
+							// Up pressed
+							isUpKeyDown = false;
+							//console.log('up released');
+							break;
+						}
+						case "s":
+						case "ArrowDown": {
+							// Down pressed
+							isDownKeyDown = false;
+							//console.log('down released');
+							break;
+						}
+					}
+				});
 			}
 
 			function animate() {
@@ -149,17 +223,15 @@
 				handleKeys();
 			};
 
-			//Set everything up
-			init()
-			//Animate it
-			animate();
 
+			function mousemove(event) {
+					console.log('eh your mouse is moving');
+				}
 
 			function handleKeys() {
 				if (isLeftKeyDown == true) {
 					//Iterates through all the values of cubes dict
 						bigCube.rotation.y -= speed;
-					
 				}
 				if (isRightKeyDown == true) {
 						bigCube.rotation.y += speed;
@@ -174,82 +246,6 @@
 					
 				}
 			};
-
-
-
-
-
-			document.addEventListener("keydown", function(event) {
-				event.preventDefault();
-				const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
-				
-				switch (key) { // change to event.key to key to use the above variable
-					case "a":
-					case "ArrowLeft":{ 
-						// Left pressed
-						isLeftKeyDown = true;
-						//console.log('left pressed');
-						break;
-					}
-					case "d":
-					case "ArrowRight": {
-						// Right pressed
-						isRightKeyDown = true;
-						//console.log('right pressed');
-						break;
-					}
-					case "w":
-					case "ArrowUp": {
-						// Up pressed
-						isUpKeyDown = true;
-						//console.log('up pressed');
-						break;
-					}
-					case "s":
-					case "ArrowDown": {
-						// Down pressed
-						isDownKeyDown = true;
-						//console.log('down pressed');
-						break;
-					}
-				}
-			});
-
-			document.addEventListener("keyup", function(event) {
-				event.preventDefault();
-				const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
-				
-				switch (key) { // change to event.key to key to use the above variable
-					case "a":
-					case "ArrowLeft":{ 
-						// Left pressed
-						isLeftKeyDown = false;
-						//console.log('left released');
-						break;
-					}
-					case "d":
-					case "ArrowRight": {
-						// Right pressed
-						isRightKeyDown = false;
-						//console.log('right released');
-						break;
-					}
-					case "w":
-					case "ArrowUp": {
-						// Up pressed
-						isUpKeyDown = false;
-						//console.log('up released');
-						break;
-					}
-					case "s":
-					case "ArrowDown": {
-						// Down pressed
-						isDownKeyDown = false;
-						//console.log('down released');
-						break;
-					}
-				}
-			});
 
 		</script>
 	</body>
