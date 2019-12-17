@@ -11,288 +11,294 @@
 	<body>
 		<script src="js/three.js"></script>
 		<script>
-			let container;
-			let camera;
-			let renderer;
-			let scene;
-			let groupCubes;
-			let cubes = [];
-			let speed = 0.03;
-			let isLeftKeyDown;
-			let isRightKeyDown;
-			let isUpKeyDown;
-			let isDownKeyDown;
+		//Note, change canvas size to not scroll
+		let container;
+		let camera;
+		let renderer;
+		let scene;
+		let groupCubes;
+		let cubes = [];
+		let speed = 0.03;
+		let isLeftKeyDown;
+		let isRightKeyDown;
+		let isUpKeyDown;
+		let isDownKeyDown;
 
-			let mouse = new THREE.Vector2();
-			let raycaster = new THREE.Raycaster();
+		let mouse = new THREE.Vector2();
+		let raycaster = new THREE.Raycaster();
+		let closestIntersected;
+		let intersects;
+		let wheelNumber = 0;
 
-			//Set everything up
-			init()
-			//Animate it
-			animate();
+		//Set everything up
+		init()
+		//Animate it
+		animate();
 
-			function init() {
-				// Get a reference to the container that will hold our scene (this will be the entire window)
-				container = document.body
+		function init() {
+			// Get a reference to the container that will hold our scene (this will be the entire window)
+			container = document.body
 
-				//create a scene
-				scene = new THREE.Scene();
+			//create a scene
+			scene = new THREE.Scene();
 
-				//Set the background color
-				scene.background = new THREE.Color('skyblue');
+			//Set the background color
+			scene.background = new THREE.Color('skyblue');
 
-				// Create a Camera
-				const fov = 35; // AKA Field of View
-				const aspect = window.innerWidth / window.innerHeight;
-				const near = 0.1; // the near clipping plane
-				const far = 100; // the far clipping plane
+			// Create a Camera
+			const fov = 35; // AKA Field of View
+			const aspect = window.innerWidth / window.innerHeight;
+			const near = 0.1; // the near clipping plane
+			const far = 100; // the far clipping plane
 
-				camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+			camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
 
-				camera.position.set( 0, 0, 7 );
-				
-				//Create a WebGLRenderer and set its width and height
-				renderer = new THREE.WebGLRenderer( {antialias: true} );
-				renderer.setSize( window.innerWidth, window.innerHeight);
-				// For mobile to be clearer
-				renderer.setPixelRatio (window.devicePixelRatio);
-				container.appendChild(renderer.domElement);
+			camera.position.set( 0, 0, 7 );
+			
+			//Create a WebGLRenderer and set its width and height
+			renderer = new THREE.WebGLRenderer( {antialias: true} );
+			renderer.setSize( window.innerWidth, window.innerHeight);
+			// For mobile to be clearer
+			renderer.setPixelRatio (window.devicePixelRatio);
+			container.appendChild(renderer.domElement);
 
-				//Creates a groupCubes of cubes (the tic tac toe thing essentially)
-				groupCubes = new THREE.Group();
-				scene.add(groupCubes);
+			//Creates a groupCubes of cubes (the tic tac toe thing essentially)
+			groupCubes = new THREE.Group();
+			scene.add(groupCubes);
 
-				//Creates 27 cubes
-				for (var i=-1; i<=1; i++){
-					for (var j=-1; j<=1; j++){
-						for (var k=-1; k<=1; k++){
-							cubes.push(createCubeWithWireframe(2/3,i*2/3,j*2/3,k*2/3));
-						}
+			//Creates 27 cubes
+			for (var i=-1; i<=1; i++){
+				for (var j=-1; j<=1; j++){
+					for (var k=-1; k<=1; k++){
+						cubes.push(createCubeWithWireframe(2/3,i*2/3,j*2/3,k*2/3));
 					}
 				}
+			}
 
-				for (cube of cubes){
-					groupCubes.add(cube);
-				}
+			for (cube of cubes){
+				groupCubes.add(cube);
+			}
+			
+
+			//Create a directional light
+			const light = new THREE.DirectionalLight( 0xffffff, 5.0 );
+
+			//Move the light back and up a bit
+			light.position.set( 10, 10, 10);
+
+			//Add light to scene
+			scene.add( light );
+			
+			function createCubeWithWireframe(length, posx, posy, posz){
+				//create a geometry
+				const geometry = new THREE.BoxBufferGeometry( length, length, length );
+				//create a basic material thats white
+				const material = new THREE.MeshStandardMaterial( { 
+					color: 0xffffff, 
+					transparent: true,
+					opacity: 0.5, 
+					polygonOffset: true,
+					polygonOffsetFactor: 1, // positive value pushes polygon further away
+					polygonOffsetUnits: 1
+				} );
+				//create a mesh containing geometry and material
+				const cube = new THREE.Mesh( geometry, material );
+				cube.position.x = posx;
+				cube.position.y = posy;
+				cube.position.z = posz;
+				scene.add( cube );
+
+				//Add the wireframe
+				const geometryWR = new THREE.EdgesGeometry( geometry);
+				const materialWR = new THREE.LineBasicMaterial( { color: 0x000000 } ); //black
+				const wireframe = new THREE.LineSegments( geometryWR, materialWR );
+				cube.add(wireframe)
+
+				// wireframe.position.x = posx;
+				// wireframe.position.y = posy;
+				// wireframe.position.z = posz;
+
+				return (cube);
+			}
+
+			document.addEventListener('mousemove', onDocumentMouseMove, false)
+
+			document.addEventListener("keydown", function(event) {
+				event.preventDefault();
+				const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
 				
-
-				//Create a directional light
-				const light = new THREE.DirectionalLight( 0xffffff, 5.0 );
-
-				//Move the light back and up a bit
-				light.position.set( 10, 10, 10);
-
-				//Add light to scene
-				scene.add( light );
-				
-				function createCubeWithWireframe(length, posx, posy, posz){
-					//create a geometry
-					const geometry = new THREE.BoxBufferGeometry( length, length, length );
-					//create a basic material thats white
-					const material = new THREE.MeshStandardMaterial( { 
-						color: 0xffffff, 
-						transparent: true,
-						opacity: 0.5, 
-						polygonOffset: true,
-						polygonOffsetFactor: 1, // positive value pushes polygon further away
-						polygonOffsetUnits: 1
-					} );
-					//create a mesh containing geometry and material
-					const cube = new THREE.Mesh( geometry, material );
-					cube.position.x = posx;
-					cube.position.y = posy;
-					cube.position.z = posz;
-					scene.add( cube );
-
-					//Add the wireframe
-					const geometryWR = new THREE.EdgesGeometry( geometry);
-					const materialWR = new THREE.LineBasicMaterial( { color: 0x000000 } ); //black
-					const wireframe = new THREE.LineSegments( geometryWR, materialWR );
-					cube.add(wireframe)
-
-					// wireframe.position.x = posx;
-					// wireframe.position.y = posy;
-					// wireframe.position.z = posz;
-
-					return (cube);
-				}
-
-				document.addEventListener('mousemove', onDocumentMouseMove, false)
-
-				document.addEventListener("keydown", function(event) {
-					event.preventDefault();
-					const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
-					
-					switch (key) { // change to event.key to key to use the above variable
-						case "a":
-						case "ArrowLeft":{ 
-							// Left pressed
-							isLeftKeyDown = true;
-							//console.log('left pressed');
-							break;
-						}
-						case "d":
-						case "ArrowRight": {
-							// Right pressed
-							isRightKeyDown = true;
-							//console.log('right pressed');
-							break;
-						}
-						case "w":
-						case "ArrowUp": {
-							// Up pressed
-							isUpKeyDown = true;
-							//console.log('up pressed');
-							break;
-						}
-						case "s":
-						case "ArrowDown": {
-							// Down pressed
-							isDownKeyDown = true;
-							//console.log('down pressed');
-							break;
-						}
+				switch (key) { // change to event.key to key to use the above variable
+					case "a":
+					case "ArrowLeft":{ 
+						// Left pressed
+						isLeftKeyDown = true;
+						//console.log('left pressed');
+						break;
 					}
-				});
-
-				document.addEventListener("keyup", function(event) {
-					event.preventDefault();
-					const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
-					
-					switch (key) { // change to event.key to key to use the above variable
-						case "a":
-						case "ArrowLeft":{ 
-							// Left pressed
-							isLeftKeyDown = false;
-							//console.log('left released');
-							break;
-						}
-						case "d":
-						case "ArrowRight": {
-							// Right pressed
-							isRightKeyDown = false;
-							//console.log('right released');
-							break;
-						}
-						case "w":
-						case "ArrowUp": {
-							// Up pressed
-							isUpKeyDown = false;
-							//console.log('up released');
-							break;
-						}
-						case "s":
-						case "ArrowDown": {
-							// Down pressed
-							isDownKeyDown = false;
-							//console.log('down released');
-							break;
-						}
+					case "d":
+					case "ArrowRight": {
+						// Right pressed
+						isRightKeyDown = true;
+						//console.log('right pressed');
+						break;
 					}
-				});
-			}
-
-			function animate() {
-				requestAnimationFrame( animate );
-				update();
-				//Update the picking ray with the camera and mouse position
-				raycaster.setFromCamera( mouse, camera );
-
-
-				renderer.render( scene, camera);
-				handleKeys();
-			};
-
-
-			function onDocumentMouseMove(event) {
-				//Calculate mouse position in normalized device coordinates
-				// (-1 to +1) for both components
-				mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
- 				mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-				//console.log(mouse.x);
-			}
-
-			function update(){
-
-				//Update the picking ray with the camera and mouse position
-				raycaster.setFromCamera( mouse, camera );
-
-				//Calculate objects intersecting the picking ray
-				var intersects = raycaster.intersectObjects( groupCubes.children );
-
-				for ( var i = 0; i < intersects.length; i++ ) {
-					intersects[i].object.material.color.set(0xff0000);
-					console.log(intersects[i])
+					case "w":
+					case "ArrowUp": {
+						// Up pressed
+						isUpKeyDown = true;
+						//console.log('up pressed');
+						break;
+					}
+					case "s":
+					case "ArrowDown": {
+						// Down pressed
+						isDownKeyDown = true;
+						//console.log('down pressed');
+						break;
+					}
 				}
+			});
 
-
-
-
-				// //Find intersections
+			document.addEventListener("keyup", function(event) {
+				event.preventDefault();
+				const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
 				
-				// //Create a ray with origin at the mouse position
-				// // and direction into the scene (camera direction)
-				// var vector = new THREE.Vector3(mouse.x, mouse.y, 1)
+				switch (key) { // change to event.key to key to use the above variable
+					case "a":
+					case "ArrowLeft":{ 
+						// Left pressed
+						isLeftKeyDown = false;
+						//console.log('left released');
+						break;
+					}
+					case "d":
+					case "ArrowRight": {
+						// Right pressed
+						isRightKeyDown = false;
+						//console.log('right released');
+						break;
+					}
+					case "w":
+					case "ArrowUp": {
+						// Up pressed
+						isUpKeyDown = false;
+						//console.log('up released');
+						break;
+					}
+					case "s":
+					case "ArrowDown": {
+						// Down pressed
+						isDownKeyDown = false;
+						//console.log('down released');
+						break;
+					}
+				}
+			});
+		}
 
-				// //Not sure
-				// vector.unproject(camera);
-
-				// //Raycaster used to see what objects the mouse is over
-				// var ray = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
-				
-				// // create an array containing all objects in the scene with which the ray intersects
-				// var intersects = ray.intersectObjects(scene.children);
-
-				// // INTERSECTED = the object in the scene currently closest to the camera 
-				// //		and intersected by the Ray projected from the mouse position 	
-
-				// // if there is one (or more) intersections
-				// if (intersects.length > 0) {
-				// 	// if the closest object intersected is not the currently stored intersection object
-				// 	if (intersects[0].object != INTERSECTED) {
-				// 	// restore previous intersection object (if it exists) to its original color
-				// 	if (INTERSECTED)
-				// 		INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
-				// 	// store reference to closest object as current intersection object
-				// 	INTERSECTED = intersects[0].object;
-				// 	// store color of closest object (for later restoration)
-				// 	INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
-				// 	// set a new color for closest object
-				// 	INTERSECTED.material.color.setHex(0xffff00);
-				// 	}
-				// } else { // there are no intersections
-				// 	// restore previous intersection object (if it exists) to its original color
-				// 	if (INTERSECTED)
-				// 	INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
-				// 	// remove previous intersection object reference
-				// 	//     by setting current intersection object to "nothing"
-				// 	INTERSECTED = null;
-				// }
-
-				// //controls.update();
-				// //stats.update();
+		function animate() {
+			requestAnimationFrame( animate );
+			update();
+			renderer.render( scene, camera );
+			handleKeys();
+		};
 
 
+		function onDocumentMouseMove(event) {
+			//Calculate mouse position in normalized device coordinates
+			// (-1 to +1) for both components
+			mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+			mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+			//console.log(mouse.x);
+		}
+
+		function update(){
+			//Update the picking ray with the camera and mouse position
+			raycaster.setFromCamera( mouse, camera );
+
+			//Calculate objects intersecting the picking ray
+			intersects = raycaster.intersectObjects( groupCubes.children );
+			//If one or more intersections,
+			if ( intersects.length > 0 ) {
+				//If closest object intersected is not the currently stored intersection object
+				if (intersects[0].object != closestIntersected){
+					//Restore previous intersection obejct to its original color
+					if (closestIntersected)
+						closestIntersected.material.color.setHex(closestIntersected.currentHex);
+					//Store reference to the closest obj as intersection obj
+					closestIntersected = intersects[0].object;
+					//Store color of closest obj
+					closestIntersected.currentHex = closestIntersected.material.color.getHex();
+					//Set a new color for the closest object						
+					intersects[0].object.material.color.set(0xff0000);
+					console.log(intersects)
+				}
+			}
+			else {
+				if (closestIntersected)
+					closestIntersected.material.color.setHex(closestIntersected.currentHex);
+				//Remove previous reference
+				closestIntersected = null;
+				clearOldSelection()
 			}
 
-			function handleKeys() {
-				if (isLeftKeyDown == true) {
-					//Iterates through all the values of cubes dict
-					groupCubes.rotation.y -= speed;
+			function clearOldSelection(){
+				if (closestIntersected)
+					closestIntersected.material.color.setHex(closestIntersected.currentHex);
+				//Remove previous reference
+				closestIntersected = null;
+
+			}
+		}
+
+		window.addEventListener("wheel", event => {
+			const delta = Math.sign(event.deltaY);
+			console.info(delta);
+			if ( intersects.length > 0 ){
+				//If scrolling up
+				if (delta == 1){
+					//eg if intersects.length = 2, wheelNumber would only go up to 1
+					if (wheelNumber < intersects.length - 1) {
+						wheelNumber += 1;
+						intersects[wheelNumber].object.material.color.set(0xff0000);
+					}
+					else if (wheelNumber == intersects.length - 1){
+						wheelNumber = 0;
+						intersects[wheelNumber].object.material.color.set(0xff0000);
+					}
 				}
-				if (isRightKeyDown == true) {
-					groupCubes.rotation.y += speed;
-					
+				//If scrolling down
+				else if (delta == -1){
+					if (wheelNumber > 0){
+						wheelNumber -=1;
+						intersects[wheelNumber].object.material.color.set(0xff0000);
+					}
+					else if (wheelNumber == 0) {
+						wheelNumber = intersects.length -1;
+						intersects[wheelNumber].object.material.color.set(0xff0000);
+					}
 				}
-				if (isUpKeyDown == true) {
-					groupCubes.rotation.x -= speed;
-					
-				}
-				if (isDownKeyDown == true) {
-					groupCubes.rotation.x += speed;
-					
-				}
-			};
+			}
+		});
+
+		function handleKeys() {
+			if (isLeftKeyDown == true) {
+				//Iterates through all the values of cubes dict
+				groupCubes.rotation.y -= speed;
+			}
+			if (isRightKeyDown == true) {
+				groupCubes.rotation.y += speed;
+				
+			}
+			if (isUpKeyDown == true) {
+				groupCubes.rotation.x -= speed;
+				
+			}
+			if (isDownKeyDown == true) {
+				groupCubes.rotation.x += speed;
+				
+			}
+		};
 
 		</script>
 	</body>
