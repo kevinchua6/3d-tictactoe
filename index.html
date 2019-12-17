@@ -61,13 +61,13 @@
 				renderer.setPixelRatio (window.devicePixelRatio);
 				container.appendChild(renderer.domElement);
 
-				
-				bigCube = createCube(0, 0.01, 0.01, 0.01);
+				//Creates an invisible mesh that all the children objects are added to
+				bigCube = createPivot(0, 0, 0);
 
 				for (var i=-1; i<=1; i++){
 					for (var j=-1; j<=1; j++){
 						for (var k=-1; k<=1; k++){
-							cubes.push(createCubeWireframe(2/3,i*2/3,j*2/3,k*2/3));
+							cubes.push(createCubeWithWireframe(2/3,i*2/3,j*2/3,k*2/3));
 						}
 					}
 				}
@@ -89,35 +89,18 @@
 
 
 
-				function createCube(length, posx, posy, posz){
-					// //create a geometry
-					// const geometry = new THREE.BoxBufferGeometry( length, length, length );
-					// //create a basic material thats white
-					// const material = new THREE.MeshStandardMaterial( { 
-					// 	transparent: true, 
-					// 	opacity: 0, 
-					// 	polygonOffset: true,
-					// 	polygonOffsetFactor: 1, // positive value pushes polygon further away
-					// 	polygonOffsetUnits: 1
-					// } );
+				function createPivot(posx, posy, posz){
+					
+					const pivot = new THREE.Mesh();
+					pivot.position.x = posx;
+					pivot.position.y = posy;
+					pivot.position.z = posz;
+					scene.add( pivot );
+					return (pivot);
 
-					//create a mesh containing geometry and material
-					const cube = new THREE.Mesh();
-					cube.position.x = posx;
-					cube.position.y = posy;
-					cube.position.z = posz;
-					scene.add( cube );
-
-					// //Add the wireframe
-					// const geometryWR = new THREE.EdgesGeometry( cube.geometry);
-					// const materialWR = new THREE.LineBasicMaterial( { color: 0x000000 } ); //black
-					// const wireframe = new THREE.LineSegments( geometryWR, materialWR );
-					// cube.add(wireframe)
-
-					return (cube);
 				}
 
-				function createCubeWireframe(length, posx, posy, posz){
+				function createCubeWithWireframe(length, posx, posy, posz){
 					//create a geometry
 					const geometry = new THREE.BoxBufferGeometry( length, length, length );
 					//create a basic material thats white
@@ -237,7 +220,7 @@
 				// (-1 to +1) for both components
 				mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
  				mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-				console.log(mouse.x);
+				//console.log(mouse.x);
 			}
 
 			function update(){
@@ -282,8 +265,8 @@
 					INTERSECTED = null;
 				}
 
-				controls.update();
-				stats.update();
+				//controls.update();
+				//stats.update();
 
 
 			}
