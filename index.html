@@ -15,7 +15,7 @@
 			let camera;
 			let renderer;
 			let scene;
-			let bigCube;
+			let groupCubes;
 			let cubes = [];
 			let speed = 0.03;
 			let isLeftKeyDown;
@@ -61,8 +61,9 @@
 				renderer.setPixelRatio (window.devicePixelRatio);
 				container.appendChild(renderer.domElement);
 
-				//Creates an invisible mesh that all the children objects are added to
-				bigCube = createPivot(0, 0, 0);
+				//Creates a groupCubes of cubes (the tic tac toe thing essentially)
+				groupCubes = new THREE.Group();
+				scene.add(groupCubes);
 
 				for (var i=-1; i<=1; i++){
 					for (var j=-1; j<=1; j++){
@@ -73,7 +74,7 @@
 				}
 
 				for (cube of cubes){
-					bigCube.add(cube);
+					groupCubes.add(cube);
 				}
 				
 
@@ -274,18 +275,18 @@
 			function handleKeys() {
 				if (isLeftKeyDown == true) {
 					//Iterates through all the values of cubes dict
-						bigCube.rotation.y -= speed;
+					groupCubes.rotation.y -= speed;
 				}
 				if (isRightKeyDown == true) {
-						bigCube.rotation.y += speed;
+					groupCubes.rotation.y += speed;
 					
 				}
 				if (isUpKeyDown == true) {
-						bigCube.rotation.x -= speed;
+					groupCubes.rotation.x -= speed;
 					
 				}
 				if (isDownKeyDown == true) {
-						bigCube.rotation.x += speed;
+					groupCubes.rotation.x += speed;
 					
 				}
 			};
