@@ -62,7 +62,7 @@
 				container.appendChild(renderer.domElement);
 
 				
-				bigCube = createCube(2, 0, 0, 0);
+				bigCube = createCube(0, 0.01, 0.01, 0.01);
 
 				for (var i=-1; i<=1; i++){
 					for (var j=-1; j<=1; j++){
@@ -90,20 +90,19 @@
 
 
 				function createCube(length, posx, posy, posz){
-					//create a geometry
-					const geometry = new THREE.BoxBufferGeometry( length, length, length );
-					//create a basic material thats white
-					const material = new THREE.MeshStandardMaterial( { 
-						color: 0xffffff, 
-						transparent: true, 
-						opacity: 0.5, 
-						polygonOffset: true,
-						polygonOffsetFactor: 1, // positive value pushes polygon further away
-						polygonOffsetUnits: 1
-					} );
+					// //create a geometry
+					// const geometry = new THREE.BoxBufferGeometry( length, length, length );
+					// //create a basic material thats white
+					// const material = new THREE.MeshStandardMaterial( { 
+					// 	transparent: true, 
+					// 	opacity: 0, 
+					// 	polygonOffset: true,
+					// 	polygonOffsetFactor: 1, // positive value pushes polygon further away
+					// 	polygonOffsetUnits: 1
+					// } );
 
 					//create a mesh containing geometry and material
-					const cube = new THREE.Mesh( geometry, material );
+					const cube = new THREE.Mesh();
 					cube.position.x = posx;
 					cube.position.y = posy;
 					cube.position.z = posz;
@@ -121,31 +120,33 @@
 				function createCubeWireframe(length, posx, posy, posz){
 					//create a geometry
 					const geometry = new THREE.BoxBufferGeometry( length, length, length );
-					// //create a basic material thats white
-					// const material = new THREE.MeshBasicMaterial( { 
-					// 	color: 0xffffff, 
-					// 	transparent: true,
-					// 	opacity: 0, 
-					// 	// polygonOffset: true,
-					// 	// polygonOffsetFactor: 1, // positive value pushes polygon further away
-					// 	// polygonOffsetUnits: 1
-					// } );
+					//create a basic material thats white
+					const material = new THREE.MeshStandardMaterial( { 
+						color: 0xffffff, 
+						transparent: true,
+						opacity: 0.5, 
+						polygonOffset: true,
+						polygonOffsetFactor: 1, // positive value pushes polygon further away
+						polygonOffsetUnits: 1
+					} );
 					//create a mesh containing geometry and material
-					//const cube = new THREE.Mesh( geometry );
-
-					//scene.add( cube );
+					const cube = new THREE.Mesh( geometry, material );
+					cube.position.x = posx;
+					cube.position.y = posy;
+					cube.position.z = posz;
+					scene.add( cube );
 
 					//Add the wireframe
 					const geometryWR = new THREE.EdgesGeometry( geometry);
 					const materialWR = new THREE.LineBasicMaterial( { color: 0x000000 } ); //black
 					const wireframe = new THREE.LineSegments( geometryWR, materialWR );
-					scene.add(wireframe)
+					cube.add(wireframe)
 
-					wireframe.position.x = posx;
-					wireframe.position.y = posy;
-					wireframe.position.z = posz;
+					// wireframe.position.x = posx;
+					// wireframe.position.y = posy;
+					// wireframe.position.z = posz;
 
-					return (wireframe);
+					return (cube);
 				}
 
 				document.addEventListener('mousemove', onDocumentMouseMove, false)
