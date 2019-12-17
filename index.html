@@ -15,9 +15,10 @@
 			let camera;
 			let renderer;
 			let scene;
+			let bigCube;
 
-			let cubes = {};
-
+			let cubes = [];
+			
 			let speed = 0.03;
 			let isLeftKeyDown;
 			let isRightKeyDown;
@@ -52,7 +53,18 @@
 				container.appendChild(renderer.domElement);
 
 				
-				cubes.bigCube = createCube(2, 0, 0, 0);
+				bigCube = createCube(2, 0, 0, 0);
+
+				for (var i=-1; i<=1; i++){
+					for (var j=-1; j<=1; j++){
+						for (var k=-1; k<=1; k++){
+							cubes.push(createCube(2/3,i*2/3,j*2/3,k*2/3));
+						}
+					}
+				}
+				for (cube of cubes){
+					bigCube.add(cube);
+				}
 				
 				
 				
@@ -71,7 +83,8 @@
 					const geometry = new THREE.BoxBufferGeometry( length, length, length );
 					//create a basic material thats white
 					const material = new THREE.MeshStandardMaterial( { 
-						color: 0xffffff, transparent: true, 
+						color: 0xffffff, 
+						transparent: true, 
 						opacity: 0.5, 
 						polygonOffset: true,
 						polygonOffsetFactor: 1, // positive value pushes polygon further away
@@ -93,6 +106,7 @@
 					return (cube);
 				}
 
+
 				
 				
 			}
@@ -111,16 +125,21 @@
 
 			function handleKeys() {
 				if (isLeftKeyDown == true) {
-					cubes.bigCube.rotation.y -= speed;
+					//Iterates through all the values of cubes dict
+						bigCube.rotation.y -= speed;
+					
 				}
 				if (isRightKeyDown == true) {
-					cubes.bigCube.rotation.y += speed;
+						bigCube.rotation.y += speed;
+					
 				}
 				if (isUpKeyDown == true) {
-					cubes.bigCube.rotation.x -= speed;
+						bigCube.rotation.x -= speed;
+					
 				}
 				if (isDownKeyDown == true) {
-					cubes.bigCube.rotation.x += speed;
+						bigCube.rotation.x += speed;
+					
 				}
 			};
 
