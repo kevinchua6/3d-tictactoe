@@ -58,10 +58,11 @@
 				for (var i=-1; i<=1; i++){
 					for (var j=-1; j<=1; j++){
 						for (var k=-1; k<=1; k++){
-							cubes.push(createCube(2/3,i*2/3,j*2/3,k*2/3));
+							cubes.push(createCubeWireframe(2/3,i*2/3,j*2/3,k*2/3));
 						}
 					}
 				}
+
 				for (cube of cubes){
 					bigCube.add(cube);
 				}
@@ -90,6 +91,7 @@
 						polygonOffsetFactor: 1, // positive value pushes polygon further away
 						polygonOffsetUnits: 1
 					} );
+
 					//create a mesh containing geometry and material
 					const cube = new THREE.Mesh( geometry, material );
 					cube.position.x = posx;
@@ -97,13 +99,43 @@
 					cube.position.z = posz;
 					scene.add( cube );
 
-					//Add the wireframe
-					const geometryWR = new THREE.EdgesGeometry( cube.geometry);
-					const materialWR = new THREE.LineBasicMaterial( { color: 0x000000 } ); //black
-					const wireframe = new THREE.LineSegments( geometryWR, materialWR );
-					cube.add(wireframe)
+					// //Add the wireframe
+					// const geometryWR = new THREE.EdgesGeometry( cube.geometry);
+					// const materialWR = new THREE.LineBasicMaterial( { color: 0x000000 } ); //black
+					// const wireframe = new THREE.LineSegments( geometryWR, materialWR );
+					// cube.add(wireframe)
 
 					return (cube);
+				}
+
+				function createCubeWireframe(length, posx, posy, posz){
+					//create a geometry
+					const geometry = new THREE.BoxBufferGeometry( length, length, length );
+					// //create a basic material thats white
+					// const material = new THREE.MeshBasicMaterial( { 
+					// 	color: 0xffffff, 
+					// 	transparent: true,
+					// 	opacity: 0, 
+					// 	// polygonOffset: true,
+					// 	// polygonOffsetFactor: 1, // positive value pushes polygon further away
+					// 	// polygonOffsetUnits: 1
+					// } );
+					//create a mesh containing geometry and material
+					//const cube = new THREE.Mesh( geometry );
+
+					//scene.add( cube );
+
+					//Add the wireframe
+					const geometryWR = new THREE.EdgesGeometry( geometry);
+					const materialWR = new THREE.LineBasicMaterial( { color: 0x000000 } ); //black
+					const wireframe = new THREE.LineSegments( geometryWR, materialWR );
+					scene.add(wireframe)
+
+					wireframe.position.x = posx;
+					wireframe.position.y = posy;
+					wireframe.position.z = posz;
+
+					return (wireframe);
 				}
 
 
@@ -156,28 +188,28 @@
 					case "ArrowLeft":{ 
 						// Left pressed
 						isLeftKeyDown = true;
-						console.log('left pressed');
+						//console.log('left pressed');
 						break;
 					}
 					case "d":
 					case "ArrowRight": {
 						// Right pressed
 						isRightKeyDown = true;
-						console.log('right pressed');
+						//console.log('right pressed');
 						break;
 					}
 					case "w":
 					case "ArrowUp": {
 						// Up pressed
 						isUpKeyDown = true;
-						console.log('up pressed');
+						//console.log('up pressed');
 						break;
 					}
 					case "s":
 					case "ArrowDown": {
 						// Down pressed
 						isDownKeyDown = true;
-						console.log('down pressed');
+						//console.log('down pressed');
 						break;
 					}
 				}
@@ -192,28 +224,28 @@
 					case "ArrowLeft":{ 
 						// Left pressed
 						isLeftKeyDown = false;
-						console.log('left released');
+						//console.log('left released');
 						break;
 					}
 					case "d":
 					case "ArrowRight": {
 						// Right pressed
 						isRightKeyDown = false;
-						console.log('right released');
+						//console.log('right released');
 						break;
 					}
 					case "w":
 					case "ArrowUp": {
 						// Up pressed
 						isUpKeyDown = false;
-						console.log('up released');
+						//console.log('up released');
 						break;
 					}
 					case "s":
 					case "ArrowDown": {
 						// Down pressed
 						isDownKeyDown = false;
-						console.log('down released');
+						//console.log('down released');
 						break;
 					}
 				}
