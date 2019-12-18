@@ -35,6 +35,9 @@
 		let closestIntersected;
 		let intersects;
 		let wheelNumber = 0;
+		
+		//ai
+		var computerSelection;
 
 		//Set everything up
 		init()
@@ -138,28 +141,24 @@
 					case "ArrowLeft":{ 
 						// Left pressed
 						isLeftKeyDown = true;
-						//console.log('left pressed');
 						break;
 					}
 					case "d":
 					case "ArrowRight": {
 						// Right pressed
 						isRightKeyDown = true;
-						//console.log('right pressed');
 						break;
 					}
 					case "w":
 					case "ArrowUp": {
 						// Up pressed
 						isUpKeyDown = true;
-						//console.log('up pressed');
 						break;
 					}
 					case "s":
 					case "ArrowDown": {
 						// Down pressed
 						isDownKeyDown = true;
-						//console.log('down pressed');
 						break;
 					}
 				}
@@ -174,28 +173,24 @@
 					case "ArrowLeft":{ 
 						// Left pressed
 						isLeftKeyDown = false;
-						//console.log('left released');
 						break;
 					}
 					case "d":
 					case "ArrowRight": {
 						// Right pressed
 						isRightKeyDown = false;
-						//console.log('right released');
 						break;
 					}
 					case "w":
 					case "ArrowUp": {
 						// Up pressed
 						isUpKeyDown = false;
-						//console.log('up released');
 						break;
 					}
 					case "s":
 					case "ArrowDown": {
 						// Down pressed
 						isDownKeyDown = false;
-						//console.log('down released');
 						break;
 					}
 				}
@@ -226,20 +221,23 @@
 			//If one or more intersections,
 			if ( intersects.length > 0 ) {
 				
-			//	closestIntersected = intersects[0];
-				//If closest object intersected is not the currently stored intersection object
-				//if (intersects[0].object != closestIntersected){
-					console.log(intersects);
-					//Restore previous intersection obejct to its original color
-					if (closestIntersected && !closestIntersected.selected)
-						closestIntersected.material.color.setHex(0xffffff);
-					//Store reference to the closest obj as intersection obj
-					closestIntersected = intersects[0].object;
-					//Store current color of closest intersection obj
-					closestIntersected.currentHex = closestIntersected.material.color.getHex();
-					//Make the closest object red						
-					intersects[0].object.material.color.set(0xff0000);
-				//}
+					//	closestIntersected = intersects[0];
+					//If closest object intersected is not the currently stored intersection object
+					//if (intersects[0].object != closestIntersected){
+						//console.log(intersects);
+						//Restore previous intersection obejct to its original color
+						if (closestIntersected && !closestIntersected.selected)
+							closestIntersected.material.color.setHex(0xffffff);
+						//Store reference to the closest obj as intersection obj
+						closestIntersected = intersects[0].object;
+
+						if (!closestIntersected.selected){
+						//Store current color of closest intersection obj
+						closestIntersected.currentHex = closestIntersected.material.color.getHex();
+						//Make the closest object red						
+						intersects[0].object.material.color.set(0xff0000);
+					}
+				
 			}
 			else {
 				if (closestIntersected && !closestIntersected.selected)
@@ -257,7 +255,7 @@
 				//If scrolling up
 				if (delta == -1){
 					//eg if intersects.length = 2, wheelNumber would only go up to 1
-					if (wheelNumber < intersects.length - 1) {
+					if (wheelNumber < intersects.length - 1 && !closestIntersected.selected) {
 						wheelNumber += 1;
 						intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
@@ -266,7 +264,7 @@
 						//Store currently selected to closestIntersected 
 						closestIntersected = intersects[wheelNumber].object;
 					}
-					else if (wheelNumber == intersects.length - 1){
+					else if (wheelNumber == intersects.length - 1 && !closestIntersected.selected){
 						wheelNumber = 0;
 						intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
@@ -277,7 +275,7 @@
 				}
 				//If scrolling down
 				else if (delta == 1){
-					if (wheelNumber > 0){
+					if (wheelNumber > 0 && !closestIntersected.selected){
 						wheelNumber -=1;
 						intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
@@ -285,7 +283,7 @@
 							closestIntersected.material.color.setHex(0xffffff);
 						closestIntersected = intersects[wheelNumber].object;
 					}
-					else if (wheelNumber == 0) {
+					else if (wheelNumber == 0 && !closestIntersected.selected) {
 						wheelNumber = intersects.length -1;
 						intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
@@ -298,13 +296,38 @@
 		});
 
 		window.addEventListener("click", event => {
-			if (closestIntersected){
+			if (closestIntersected && !closestIntersected.selected){
 				closestIntersected.selected = true;
 				//When click, the closestIntersected turns red and does not turn back even when hovered over.
 				//That means that a variable for each object is required to show whether it can turn back to its normal color or not
 				//ie, closestintersected.selected
+
+				//Get a list of all available squares ie all the squares that do not have groupCubes.children[6].selected
+				let squaresAvailableArray = [];
+				for (var i=0; i<27; i++){
+					if (!groupCubes.children[i].selected){
+						squaresAvailableArray.push(groupCubes.children[i]);
+					}
+				}
+				if (squaresAvailableArray.length > 0){
+					let computerSelectionInt = randomInteger(0, squaresAvailableArray.length - 1 );
+					computerSelection = squaresAvailableArray[computerSelectionInt];
+					computerSelection.material.color.set(0x00ff00);
+					computerSelection.selected = true;
+				}
 			}
 		});
+
+		function randomInteger(min, max) {
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+
+		// function comMove(){
+		// 	let computerSelectionInt = randomInteger(0, squaresAvailableArray.length);
+		// 	computerSelection = groupCubes.children[computerSelectionInt];
+		// 	computerSelection.material.color.set(0x00ff00);
+		// 	computerSelection.selected = true;
+		// }
 
 		function handleKeys() {
 			if (isLeftKeyDown == true) {
