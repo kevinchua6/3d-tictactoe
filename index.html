@@ -12,10 +12,15 @@
 		<script src="js/three.js"></script>
 		<script>
 		//Note, change canvas size to not scroll
+		//Note, add the rotating camera with the mouse later, do the highlighting first
+		
+		// rendering var
 		let container;
 		let camera;
 		let renderer;
 		let scene;
+
+		//The tic-tac-toe object vars
 		let groupCubes;
 		let cubes = [];
 		let speed = 0.03;
@@ -24,6 +29,7 @@
 		let isUpKeyDown;
 		let isDownKeyDown;
 
+		//vars to interact with the tictactoe
 		let mouse = new THREE.Vector2();
 		let raycaster = new THREE.Raycaster();
 		let closestIntersected;
@@ -225,7 +231,7 @@
 				//if (intersects[0].object != closestIntersected){
 					console.log(intersects);
 					//Restore previous intersection obejct to its original color
-					if (closestIntersected)
+					if (closestIntersected && !closestIntersected.selected)
 						closestIntersected.material.color.setHex(0xffffff);
 					//Store reference to the closest obj as intersection obj
 					closestIntersected = intersects[0].object;
@@ -236,7 +242,7 @@
 				//}
 			}
 			else {
-				if (closestIntersected)
+				if (closestIntersected && !closestIntersected.selected)
 					closestIntersected.material.color.setHex(0xffffff);
 				//Remove previous reference
 				closestIntersected = null;
@@ -255,15 +261,16 @@
 						wheelNumber += 1;
 						intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
-						if (closestIntersected)
+						if (closestIntersected && !closestIntersected.selected)
 							closestIntersected.material.color.setHex(0xffffff);
+						//Store currently selected to closestIntersected 
 						closestIntersected = intersects[wheelNumber].object;
 					}
 					else if (wheelNumber == intersects.length - 1){
 						wheelNumber = 0;
 						intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
-						if (closestIntersected)
+						if (closestIntersected && !closestIntersected.selected)
 							closestIntersected.material.color.setHex(0xffffff);
 						closestIntersected = intersects[wheelNumber].object;
 					}
@@ -274,7 +281,7 @@
 						wheelNumber -=1;
 						intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
-						if (closestIntersected)
+						if (closestIntersected && !closestIntersected.selected)
 							closestIntersected.material.color.setHex(0xffffff);
 						closestIntersected = intersects[wheelNumber].object;
 					}
@@ -282,11 +289,20 @@
 						wheelNumber = intersects.length -1;
 						intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
-						if (closestIntersected)
+						if (closestIntersected && !closestIntersected.selected)
 							closestIntersected.material.color.setHex(0xffffff);
 						closestIntersected = intersects[wheelNumber].object;
 					}
 				}
+			}
+		});
+
+		window.addEventListener("click", event => {
+			if (closestIntersected){
+				closestIntersected.selected = true;
+				//When click, the closestIntersected turns red and does not turn back even when hovered over.
+				//That means that a variable for each object is required to show whether it can turn back to its normal color or not
+				//ie, closestintersected.selected
 			}
 		});
 
