@@ -99,6 +99,7 @@
 		let isRightKeyDown;
 		let isUpKeyDown;
 		let isDownKeyDown;
+		let stop;
 
 		//vars to interact with the tictactoe
 		let mouse = new THREE.Vector2();
@@ -109,6 +110,7 @@
 		
 		//ai
 		var computerSelection;
+
 
 		//Set everything up
 		init()
@@ -319,7 +321,7 @@
 		window.addEventListener("wheel", event => {
 			const delta = Math.sign(event.deltaY);
 			//console.info(delta);
-			if ( intersects.length > 1 ){
+			if ( intersects.length > 1 && !stop){
 				//If scrolling up
 				if (delta == -1){
 					//eg if intersects.length = 2, wheelNumber would only go up to 1
@@ -367,13 +369,41 @@
 			if (closestIntersected && !closestIntersected.selected){
 				closestIntersected.selected = 'you';
 				//Check if you win after the selection is confirmed				
-				checkWinYou()
+				if (checkWinYou()){
+					stop = true;
+					stopGame();
+				}
 				//When click, the closestIntersected turns red and does not turn back even when hovered over.
 				//That means that a variable for each object is required to show whether it can turn back to its normal color or not
 				//ie, closestintersected.selected
 
-				//Get a list of all available squares ie all the squares that do not have groupCubes.children[6].selected
-				let squaresAvailableArray = [];
+				//Check if theres a winning play, if no, check if opponent has a winning play, if not do a random move.
+				if (!checkWinnnablePlayCom()){
+					if (!checkWinnablePlayYou()){
+						//console.log('hey')
+						randomMoveCom();
+					}
+				}
+				
+				//Check if the opponent wins after he made his selection
+				if (checkWinCom() && !stop){
+					stop = true;
+					stopGame();
+				}
+			}
+		});
+
+
+		function stopGame(){
+			//Stops all selections from happening
+			for (var i=0;i<27;i++){
+				groupCubes.children[i].selected = true;
+			}
+		}
+
+		function randomMoveCom(){
+			//Get a list of all available squares ie all the squares that do not have groupCubes.children[6].selected
+			let squaresAvailableArray = [];
 				for (var i=0; i<27; i++){
 					if (!groupCubes.children[i].selected){
 						squaresAvailableArray.push(groupCubes.children[i]);
@@ -386,17 +416,62 @@
 					computerSelection.material.color.set(0x00ff00);
 					computerSelection.selected = 'com';
 				}
-				
-				//Check if the opponent wins after he made his selection
-				checkWinCom()
+		}
+
+		function checkWinnnablePlayCom(){
+			for (var i=0;i<27;i++){
+				//If not selected
+				if (!groupCubes.children[i].selected){
+					groupCubes.children[i].selected = 'com';
+					if (checkWin(groupCubes, 'com')){
+						//If its a winnable play, do it
+						groupCubes.children[i].material.color.set(0x00ff00);
+						groupCubes.children[i].selected = 'com';
+						//console.log('color set!')
+						return true;
+					}
+					groupCubes.children[i].selected = null;
+				}
 			}
-		});
+		}
+
+		function checkWinnablePlayYou(){
+			for (var i=0;i<27;i++){
+				//If not selected
+				if (!groupCubes.children[i].selected){
+					groupCubes.children[i].selected = 'you';
+					if (checkWin(groupCubes, 'you')){
+						//If its a winnable play, block it
+						groupCubes.children[i].material.color.set(0x00ff00);
+						groupCubes.children[i].selected = 'com';
+						
+						return true;
+					}
+					groupCubes.children[i].selected = null;
+				}
+			}
+		}
 
 		function randomInteger(min, max) {
 			return Math.floor(Math.random() * (max - min + 1)) + min;
 		}
 
-		function checkWin(groupCubes, color){
+		function checkWinYou(){
+			if (checkWin(groupCubes, 'you')){
+				alert('You win!')
+				return true
+			}
+		}
+
+		function checkWinCom(){
+			if (checkWin(groupCubes, 'com')){
+				alert('Computer wins!')
+				return true
+			}
+		}
+
+		function checkWin(groupCubes, player){
+			//player is a string which only accepts 'you' or 'com'
 			for (var i=0; i<paths.length;i++){
 				var firstWin = paths[i][0];
 				var secondWin = paths[i][1];
@@ -404,16 +479,16 @@
 
 				//Convert arrays to string
 				var firstWinString = JSON.stringify( firstWin );
-				console.log(firstWinString)
+				//console.log(firstWinString)
 				var secondWinString = JSON.stringify( secondWin );
 				var thirdWinString = JSON.stringify( thirdWin );
 
 				//assuming cubes is a dictionary with key [0,0,0], value <cube object>
 				//cubes = {"[0,0,0]": <cube object>, ...}
 				//Check that all of them are equal to that color
-				if (cubesDict[firstWinString].material.color.getHexString() == color 
-				&& cubesDict[secondWinString].material.color.getHexString() == color
-				&& cubesDict[thirdWinString].material.color.getHexString() == color){
+				if (cubesDict[firstWinString].selected == player 
+				&& cubesDict[secondWinString].selected == player
+				&& cubesDict[thirdWinString].selected == player){
 					return (true);
 				}
 			}
@@ -422,18 +497,6 @@
 			// 	//gets Hex color in string of i, the cube number
 			// 	return (groupCubes.children[i].material.color.getHexString() == color);
 			// }
-		}
-		
-		function checkWinYou(){
-			if (checkWin(groupCubes,"ff0000")){
-				alert('You win!')
-			}
-		}
-
-		function checkWinCom(){
-			if (checkWin(groupCubes,"00ff00")){
-				alert('Computer wins!')
-			}
 		}
 
 		function handleKeys() {
