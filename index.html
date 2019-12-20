@@ -13,6 +13,76 @@
 		<script>
 		//Note, change canvas size to not scroll
 		//Note, add the rotating camera with the mouse later, do the highlighting first
+
+		// Define all winning placements
+		var paths = [];      
+		
+		// Everything in the bottom level (z=0)
+		paths[0] = [[0,0,0],[1,0,0],[2,0,0]];
+		paths[1] = [[0,1,0],[1,1,0],[2,1,0]];
+		paths[2] = [[0,2,0],[1,2,0],[2,2,0]];
+		paths[3] = [[0,0,0],[0,1,0],[0,2,0]];
+		paths[4] = [[1,0,0],[1,1,0],[1,2,0]];
+		paths[5] = [[2,0,0],[2,1,0],[2,2,0]];
+		paths[6] = [[0,0,0],[1,1,0],[2,2,0]];
+		paths[7] = [[2,0,0],[1,1,0],[0,2,0]];
+		
+		// Everything in the middle level (z=1)
+		paths[8] = [[0,0,1],[1,0,1],[2,0,1]];
+		paths[9] = [[0,1,1],[1,1,1],[2,1,1]];
+		paths[10] = [[0,2,1],[1,2,1],[2,2,1]];
+		paths[11] = [[0,0,1],[0,1,1],[0,2,1]];
+		paths[12] = [[1,0,1],[1,1,1],[1,2,1]];
+		paths[13] = [[2,0,1],[2,1,1],[2,2,1]];
+		paths[14] = [[0,0,1],[1,1,1],[2,2,1]];
+		paths[15] = [[2,0,1],[1,1,1],[0,2,1]];
+		
+		// Everything in the top layer (z=2)
+		paths[16] = [[0,0,2],[1,0,2],[2,0,2]];
+		paths[17] = [[0,1,2],[1,1,2],[2,1,2]];
+		paths[18] = [[0,2,2],[1,2,2],[2,2,2]];
+		paths[19] = [[0,0,2],[0,1,2],[0,2,2]];
+		paths[20] = [[1,0,2],[1,1,2],[1,2,2]];
+		paths[21] = [[2,0,2],[2,1,2],[2,2,2]];
+		paths[22] = [[0,0,2],[1,1,2],[2,2,2]];
+		paths[23] = [[2,0,2],[1,1,2],[0,2,2]];
+		
+		// All the straight columns
+		paths[24] = [[0,0,0],[0,0,1],[0,0,2]];
+		paths[25] = [[1,0,0],[1,0,1],[1,0,2]];
+		paths[26] = [[2,0,0],[2,0,1],[2,0,2]];     
+		paths[27] = [[0,1,0],[0,1,1],[0,1,2]];
+		paths[28] = [[1,1,0],[1,1,1],[1,1,2]];
+		paths[29] = [[2,1,0],[2,1,1],[2,1,2]];      
+		paths[30] = [[0,2,0],[0,2,1],[0,2,2]];
+		paths[31] = [[1,2,0],[1,2,1],[1,2,2]];
+		paths[32] = [[2,2,0],[2,2,1],[2,2,2]];
+		
+		// All the diagonal columns - back to front
+		paths[33] = [[0,0,0],[0,1,1],[0,2,2]];
+		paths[34] = [[1,0,0],[1,1,1],[1,2,2]];
+		paths[35] = [[2,0,0],[2,1,1],[2,2,2]];
+		
+		// All the diagonal columns - front to back
+		paths[36] = [[0,2,0],[0,1,1],[0,0,2]];
+		paths[37] = [[1,2,0],[1,1,1],[1,0,2]];
+		paths[38] = [[2,2,0],[2,1,1],[2,0,2]];
+		
+		// All the diagonal columns - left to right
+		paths[39] = [[0,0,0],[1,0,1],[2,0,2]];
+		paths[40] = [[0,1,0],[1,1,1],[2,1,2]];
+		paths[41] = [[0,2,0],[1,2,1],[2,2,2]];
+		
+		// All the diagonal columns - right to left
+		paths[42] = [[2,0,0],[1,0,1],[0,0,2]];
+		paths[43] = [[2,1,0],[1,1,1],[0,1,2]];
+		paths[44] = [[2,2,0],[1,2,1],[0,2,2]];
+		
+		// All the diagonal columns - corner to corner
+		paths[45] = [[0,0,0],[1,1,1],[2,2,2]];
+		paths[46] = [[0,2,0],[1,1,1],[2,0,2]];
+		paths[47] = [[2,0,0],[1,1,1],[0,2,2]];
+		paths[47] = [[2,2,0],[1,1,1],[0,0,2]];
 		
 		// rendering var
 		let container;
@@ -23,6 +93,7 @@
 		//The tic-tac-toe object vars
 		let groupCubes;
 		let cubes = [];
+		let cubesDict = {};
 		let speed = 0.03;
 		let isLeftKeyDown;
 		let isRightKeyDown;
@@ -76,15 +147,16 @@
 			scene.add(groupCubes);
 
 			//Creates 27 cubes
-			for (var i=-1; i<=1; i++){
-				for (var j=-1; j<=1; j++){
-					for (var k=-1; k<=1; k++){
-						cubes.push(createCubeWithWireframe(2/3,i*2/3,j*2/3,k*2/3));
+			for (var x=-1; x<=1; x++){
+				for (var y=-1; y<=1; y++){
+					for (var z=-1; z<=1; z++){
+						//every cube would be in a dict, with key representing its placement (must be minus cause its from the origin, but thats not the start of the cube)
+						cubesDict["["+(x+1)+","+(y+1)+","+(z+1)+"]"] = createCubeWithWireframe(2/3,x*2/3,y*2/3,z*2/3);
 					}
 				}
 			}
 
-			for (cube of cubes){
+			for (const[key,cube] of Object.entries(cubesDict)) {
 				groupCubes.add(cube);
 			}
 			
@@ -220,23 +292,19 @@
 			intersects = raycaster.intersectObjects( groupCubes.children );
 			//If one or more intersections,
 			if ( intersects.length > 0 ) {
-				
-					//	closestIntersected = intersects[0];
-					//If closest object intersected is not the currently stored intersection object
-					//if (intersects[0].object != closestIntersected){
-						//console.log(intersects);
-						//Restore previous intersection obejct to its original color
-						if (closestIntersected && !closestIntersected.selected)
-							closestIntersected.material.color.setHex(0xffffff);
-						//Store reference to the closest obj as intersection obj
-						closestIntersected = intersects[0].object;
+				//If a closestIntersected obj (the prev selected obj) exists and its not selected
+				//Restore previous intersection obejct to its original color
+				if (closestIntersected && !closestIntersected.selected)
+					closestIntersected.material.color.setHex(0xffffff);
+				//Store reference to the closest obj as intersection obj
+				closestIntersected = intersects[0].object;
 
-						if (!closestIntersected.selected){
-						//Store current color of closest intersection obj
-						closestIntersected.currentHex = closestIntersected.material.color.getHex();
-						//Make the closest object red						
-						intersects[0].object.material.color.set(0xff0000);
-					}
+				if (!closestIntersected.selected){
+					//Store current color of closest intersection obj
+					closestIntersected.currentHex = closestIntersected.material.color.getHex();
+					//Make the closest object red						
+					intersects[0].object.material.color.set(0xff0000);
+				}
 				
 			}
 			else {
@@ -255,7 +323,7 @@
 				//If scrolling up
 				if (delta == -1){
 					//eg if intersects.length = 2, wheelNumber would only go up to 1
-					if (wheelNumber < intersects.length - 1 && !closestIntersected.selected) {
+					if (wheelNumber < intersects.length - 1) {
 						wheelNumber += 1;
 						intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
@@ -264,7 +332,7 @@
 						//Store currently selected to closestIntersected 
 						closestIntersected = intersects[wheelNumber].object;
 					}
-					else if (wheelNumber == intersects.length - 1 && !closestIntersected.selected){
+					else if (wheelNumber == intersects.length - 1){
 						wheelNumber = 0;
 						intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
@@ -286,7 +354,7 @@
 					else if (wheelNumber == 0 && !closestIntersected.selected) {
 						wheelNumber = intersects.length -1;
 						intersects[wheelNumber].object.material.color.set(0xff0000);
-						//Set current selected red back to its normal color and remove the previous reference
+						//Set current selected red back to its normal color (white) and remove the previous reference
 						if (closestIntersected && !closestIntersected.selected)
 							closestIntersected.material.color.setHex(0xffffff);
 						closestIntersected = intersects[wheelNumber].object;
@@ -297,7 +365,9 @@
 
 		window.addEventListener("click", event => {
 			if (closestIntersected && !closestIntersected.selected){
-				closestIntersected.selected = true;
+				closestIntersected.selected = 'you';
+				//Check if you win after the selection is confirmed				
+				checkWinYou()
 				//When click, the closestIntersected turns red and does not turn back even when hovered over.
 				//That means that a variable for each object is required to show whether it can turn back to its normal color or not
 				//ie, closestintersected.selected
@@ -309,12 +379,16 @@
 						squaresAvailableArray.push(groupCubes.children[i]);
 					}
 				}
+				//Moves computer if there is available space left
 				if (squaresAvailableArray.length > 0){
 					let computerSelectionInt = randomInteger(0, squaresAvailableArray.length - 1 );
 					computerSelection = squaresAvailableArray[computerSelectionInt];
 					computerSelection.material.color.set(0x00ff00);
-					computerSelection.selected = true;
+					computerSelection.selected = 'com';
 				}
+				
+				//Check if the opponent wins after he made his selection
+				checkWinCom()
 			}
 		});
 
@@ -322,12 +396,45 @@
 			return Math.floor(Math.random() * (max - min + 1)) + min;
 		}
 
-		// function comMove(){
-		// 	let computerSelectionInt = randomInteger(0, squaresAvailableArray.length);
-		// 	computerSelection = groupCubes.children[computerSelectionInt];
-		// 	computerSelection.material.color.set(0x00ff00);
-		// 	computerSelection.selected = true;
-		// }
+		function checkWin(groupCubes, color){
+			for (var i=0; i<paths.length;i++){
+				var firstWin = paths[i][0];
+				var secondWin = paths[i][1];
+				var thirdWin = paths[i][2];
+
+				//Convert arrays to string
+				var firstWinString = JSON.stringify( firstWin );
+				console.log(firstWinString)
+				var secondWinString = JSON.stringify( secondWin );
+				var thirdWinString = JSON.stringify( thirdWin );
+
+				//assuming cubes is a dictionary with key [0,0,0], value <cube object>
+				//cubes = {"[0,0,0]": <cube object>, ...}
+				//Check that all of them are equal to that color
+				if (cubesDict[firstWinString].material.color.getHexString() == color 
+				&& cubesDict[secondWinString].material.color.getHexString() == color
+				&& cubesDict[thirdWinString].material.color.getHexString() == color){
+					return (true);
+				}
+			}
+
+			// function isColorAtBox(i, color){
+			// 	//gets Hex color in string of i, the cube number
+			// 	return (groupCubes.children[i].material.color.getHexString() == color);
+			// }
+		}
+		
+		function checkWinYou(){
+			if (checkWin(groupCubes,"ff0000")){
+				alert('You win!')
+			}
+		}
+
+		function checkWinCom(){
+			if (checkWin(groupCubes,"00ff00")){
+				alert('Computer wins!')
+			}
+		}
 
 		function handleKeys() {
 			if (isLeftKeyDown == true) {
