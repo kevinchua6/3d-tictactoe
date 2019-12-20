@@ -4,15 +4,45 @@
 		<meta charset="utf-8">
 		<title>3D Tic Tac Toe</title>
 		<style>
+			#dialogDiv { 
+				border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
+				border: 2px solid grey;
+				background: #C8C8C8;
+				color: black; 
+				width: 250px;
+				height: 30px;
+				position: absolute;
+				top: 85%;
+				left: 50%;
+				margin-left: -125px;
+			}       
+
+			#dialogText { 
+				margin-left: 8px;
+				margin-top: 6px; 
+			}
+
+			#newGameButton { 
+				position: relative,;
+				float: right; 
+				margin-top: -35px;
+				margin-right: 8px;
+			}
+
 			body { margin: 0; }
 			canvas { width: 100%; height: 100% }
 		</style>
 	</head>
 	<body>
+		<div id="dialogDiv" style="display: none">
+			<p id="dialogText">Play another game?</p>
+			<button id="newGameButton" type="button">New Game</button>
+		</div>
 		<script src="js/three.js"></script>
 		<script>
 		//Note, change canvas size to not scroll
 		//Note, add the rotating camera with the mouse later, do the highlighting first
+		//Note, add stalemate
 
 		// Define all winning placements
 		var paths = [];      
@@ -317,7 +347,7 @@
 				
 			}
 		}
-
+		//note: 0xff0000 red, 0xffffff white, 0x00ff00 green
 		window.addEventListener("wheel", event => {
 			const delta = Math.sign(event.deltaY);
 			//console.info(delta);
@@ -327,7 +357,10 @@
 					//eg if intersects.length = 2, wheelNumber would only go up to 1
 					if (wheelNumber < intersects.length - 1) {
 						wheelNumber += 1;
-						intersects[wheelNumber].object.material.color.set(0xff0000);
+						//If the selected one is white (not green), change the current block to red
+						if (intersects[wheelNumber].object.material.color.getHexString() == 'ffffff')
+							intersects[wheelNumber].object.material.color.set(0xff0000);
+						
 						//Set current selected red back to its normal color and remove the previous reference
 						if (closestIntersected && !closestIntersected.selected)
 							closestIntersected.material.color.setHex(0xffffff);
@@ -336,7 +369,8 @@
 					}
 					else if (wheelNumber == intersects.length - 1){
 						wheelNumber = 0;
-						intersects[wheelNumber].object.material.color.set(0xff0000);
+						if (intersects[wheelNumber].object.material.color.getHexString() == 'ffffff')
+							intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
 						if (closestIntersected && !closestIntersected.selected)
 							closestIntersected.material.color.setHex(0xffffff);
@@ -345,21 +379,26 @@
 				}
 				//If scrolling down
 				else if (delta == 1){
-					if (wheelNumber > 0 && !closestIntersected.selected){
+					console.log(wheelNumber)
+					if (wheelNumber > 0){
 						wheelNumber -=1;
-						intersects[wheelNumber].object.material.color.set(0xff0000);
+						if (intersects[wheelNumber].object.material.color.getHexString() == 'ffffff')
+							intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color and remove the previous reference
 						if (closestIntersected && !closestIntersected.selected)
 							closestIntersected.material.color.setHex(0xffffff);
 						closestIntersected = intersects[wheelNumber].object;
+						console.log(wheelNumber)
 					}
-					else if (wheelNumber == 0 && !closestIntersected.selected) {
+					else if (wheelNumber == 0) {
 						wheelNumber = intersects.length -1;
-						intersects[wheelNumber].object.material.color.set(0xff0000);
+						if (intersects[wheelNumber].object.material.color.getHexString() == 'ffffff')
+							intersects[wheelNumber].object.material.color.set(0xff0000);
 						//Set current selected red back to its normal color (white) and remove the previous reference
 						if (closestIntersected && !closestIntersected.selected)
 							closestIntersected.material.color.setHex(0xffffff);
 						closestIntersected = intersects[wheelNumber].object;
+						console.log(wheelNumber)
 					}
 				}
 			}
@@ -369,8 +408,10 @@
 			if (closestIntersected && !closestIntersected.selected){
 				closestIntersected.selected = 'you';
 				//Check if you win after the selection is confirmed				
-				if (checkWinYou()){
+				if (checkWin('you')){
 					stop = true;
+					document.getElementById("dialogDiv").style.display = 'inline';
+					document.getElementById("dialogText").innerHTML = "You won the game!";
 					stopGame();
 				}
 				//When click, the closestIntersected turns red and does not turn back even when hovered over.
@@ -386,13 +427,25 @@
 				}
 				
 				//Check if the opponent wins after he made his selection
-				if (checkWinCom() && !stop){
+				if (checkWin('com') && !stop){
 					stop = true;
+					document.getElementById("dialogDiv").style.display = 'inline';
+					document.getElementById("dialogText").innerHTML= "Com won the game!";
 					stopGame();
 				}
 			}
 		});
 
+		document.getElementById("newGameButton").addEventListener("click", newGame);
+
+		function newGame(){
+			document.getElementById("dialogDiv").style.display = 'none';
+			stop = false;
+			for (var i=0;i<27;i++){
+				groupCubes.children[i].selected = null;
+				groupCubes.children[i].material.color.set(0xffffff);
+			}
+		}
 
 		function stopGame(){
 			//Stops all selections from happening
@@ -423,7 +476,7 @@
 				//If not selected
 				if (!groupCubes.children[i].selected){
 					groupCubes.children[i].selected = 'com';
-					if (checkWin(groupCubes, 'com')){
+					if (checkWin('com')){
 						//If its a winnable play, do it
 						groupCubes.children[i].material.color.set(0x00ff00);
 						groupCubes.children[i].selected = 'com';
@@ -440,11 +493,10 @@
 				//If not selected
 				if (!groupCubes.children[i].selected){
 					groupCubes.children[i].selected = 'you';
-					if (checkWin(groupCubes, 'you')){
+					if (checkWin('you')){
 						//If its a winnable play, block it
 						groupCubes.children[i].material.color.set(0x00ff00);
 						groupCubes.children[i].selected = 'com';
-						
 						return true;
 					}
 					groupCubes.children[i].selected = null;
@@ -456,21 +508,7 @@
 			return Math.floor(Math.random() * (max - min + 1)) + min;
 		}
 
-		function checkWinYou(){
-			if (checkWin(groupCubes, 'you')){
-				alert('You win!')
-				return true
-			}
-		}
-
-		function checkWinCom(){
-			if (checkWin(groupCubes, 'com')){
-				alert('Computer wins!')
-				return true
-			}
-		}
-
-		function checkWin(groupCubes, player){
+		function checkWin(player){
 			//player is a string which only accepts 'you' or 'com'
 			for (var i=0; i<paths.length;i++){
 				var firstWin = paths[i][0];
