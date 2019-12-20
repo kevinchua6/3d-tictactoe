@@ -138,6 +138,7 @@
 		let intersects;
 		let wheelNumber = 0;
 		
+		
 		//ai
 		var computerSelection;
 
@@ -309,6 +310,8 @@
 
 
 		function onDocumentMouseMove(event) {
+			//update wheel number
+			wheelNumber = 0
 			//Calculate mouse position in normalized device coordinates
 			// (-1 to +1) for both components
 			mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -413,6 +416,7 @@
 					document.getElementById("dialogDiv").style.display = 'inline';
 					document.getElementById("dialogText").innerHTML = "You won the game!";
 					stopGame();
+					return;
 				}
 				//When click, the closestIntersected turns red and does not turn back even when hovered over.
 				//That means that a variable for each object is required to show whether it can turn back to its normal color or not
@@ -421,17 +425,17 @@
 				//Check if theres a winning play, if no, check if opponent has a winning play, if not do a random move.
 				if (!checkWinnnablePlayCom()){
 					if (!checkWinnablePlayYou()){
-						//console.log('hey')
 						randomMoveCom();
 					}
 				}
 				
 				//Check if the opponent wins after he made his selection
-				if (checkWin('com') && !stop){
+				if (checkWin('com')){
 					stop = true;
 					document.getElementById("dialogDiv").style.display = 'inline';
 					document.getElementById("dialogText").innerHTML= "Com won the game!";
 					stopGame();
+					return;
 				}
 			}
 		});
