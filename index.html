@@ -240,8 +240,6 @@
 			// 	renderer.setSize(window.outerWidth, window.outerHeight);
 			// });
 
-			document.addEventListener('mousemove', onDocumentMouseMove, false)
-
 			document.addEventListener("keydown", function(event) {
 				event.preventDefault();
 				const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
@@ -313,8 +311,7 @@
 			handleKeys();
 		};
 
-
-		function onDocumentMouseMove(event) {
+		document.addEventListener('mousemove', function() {
 			//update wheel number
 			wheelNumber = 0
 			//Calculate mouse position in normalized device coordinates
@@ -322,7 +319,7 @@
 			mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 			mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 			update()
-		}
+		}, false);
 
 		function update(){
 			//Update the picking ray with the camera and mouse position
@@ -434,7 +431,10 @@
 				//Check if theres a winning play, if no, check if opponent has a winning play, if not do a random move.
 				if (!checkWinnnablePlayCom() && !stop){
 					if (!checkWinnablePlayYou() && !stop){
-						randomMoveCom();
+						if (!randomMoveCom()) {
+							stalemate();
+							return;
+						}
 					}
 				}
 				
@@ -449,23 +449,29 @@
 			}
 		});
 
-		document.getElementById("newGameButton").addEventListener("click", newGame);
+		function stalemate(){
+			stop = true;
+			document.getElementById("dialogDiv").style.display = 'inline';
+			document.getElementById("dialogText").innerHTML = "It's a stalemate.";
+			stopGame();
+		};
 
-		function newGame(){
+		document.getElementById("newGameButton").addEventListener("click", function() {
+			//new game
 			document.getElementById("dialogDiv").style.display = 'none';
 			for (var i=0;i<27;i++){
 				groupCubes.children[i].selected = null;
 				groupCubes.children[i].material.color.set(0xffffff);
 			}
 			stop = false;
-		}
+		});
 
 		function stopGame(){
 			//Stops all selections from happening
 			for (var i=0;i<27;i++){
 				groupCubes.children[i].selected = true;
 			}
-		}
+		};
 
 		function randomMoveCom(){
 			//Get a list of all available squares ie all the squares that do not have groupCubes.children[6].selected
@@ -481,6 +487,10 @@
 					computerSelection = squaresAvailableArray[computerSelectionInt];
 					computerSelection.material.color.set(0x00ff00);
 					computerSelection.selected = 'com';
+					return true;
+				}
+				else {
+					return false;
 				}
 		}
 
