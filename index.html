@@ -4,6 +4,43 @@
 		<meta charset="utf-8">
 		<title>3D Tic Tac Toe</title>
 		<style>
+			/* Start screen */
+
+			body {background-color: skyblue;}
+
+			.centerTitle {
+				font-size: 7em;
+				text-shadow: 0 1px 2px;
+				animation: pulse 6s linear infinite;
+				left: 0;
+				line-height: 200px;
+				margin-top: -100px;
+				position: absolute;
+				text-align: center;
+				top: 50%;
+				width: 100%;
+			}
+
+			#startGameButton {
+				border: 2px solid grey;
+				background: #63bbff;
+				color: black; 
+				font-size: 5em;
+				text-shadow: 0 1px 2px;
+				line-height: 200px;
+				position: fixed;
+				text-align: center;
+  				margin-right: auto;
+				width: 100%;
+				bottom: 0;
+			}
+
+			#startGameButton:hover {
+				background-color: #9bc4ff;
+			}
+			
+			/* End of start screen */
+
 			#dialogDiv { 
 				border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
 				border: 2px solid grey;
@@ -35,12 +72,28 @@
 		</style>
 	</head>
 	<body>
+		<!-- html for start screen -->
+		<div class="centerTitle">3D Tic Tac Toe</div>
+		<button id="startGameButton">Start Game</button>
+		<!-- End of code -->
+
 		<div id="dialogDiv" style="display: none">
 			<p id="dialogText">Play another game?</p>
 			<button id="newGameButton" type="button">New Game</button>
 		</div>
 		<script src="js/three.js"></script>
 		<script>
+
+		document.getElementById("startGameButton").addEventListener("click", function() {
+			//Start game
+			//Set everything up
+			init()
+			//Animate it
+			animate();
+			document.querySelector( '#startGameButton' ).remove();
+			document.querySelector( '.centerTitle' ).remove();
+		});
+
 		//Note, add the rotating camera with the mouse later, do the highlighting first
 		// Define all winning placements
 		
@@ -142,10 +195,7 @@
 		var computerSelection;
 
 
-		//Set everything up
-		init()
-		//Animate it
-		animate();
+
 
 		function init() {
 			// Get a reference to the container that will hold our scene (this will be the entire window)
