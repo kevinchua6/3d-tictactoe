@@ -84,7 +84,11 @@
 		<script src="js/three.js"></script>
 		<script>
 
+		//gamestart var
+		let gameStartBool = false;
+
 		document.getElementById("startGameButton").addEventListener("click", function() {
+			gameStartBool = true;
 			//Start game
 			//Set everything up
 			init()
@@ -369,44 +373,50 @@
 		});
 
 		document.addEventListener('mousemove', function() {
-			//update wheel number
-			wheelNumber = 0
-			//Calculate mouse position in normalized device coordinates
-			// (-1 to +1) for both components
-			mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-			mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-			update()
+			if (gameStartBool){
+				//update wheel number
+				wheelNumber = 0
+				//Calculate mouse position in normalized device coordinates
+				// (-1 to +1) for both components
+				mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+				mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+				update()
+			}
 		}, false);
 
+		mouseDraggingBool = false;
+
 		function update(){
-			//Update the picking ray with the camera and mouse position
-			raycaster.setFromCamera( mouse, camera );
+				if (!mouseDraggingBool){
+				//Update the picking ray with the camera and mouse position
+				raycaster.setFromCamera( mouse, camera );
 
-			//Calculate objects intersecting the picking ray
-			intersects = raycaster.intersectObjects( groupCubes.children );
-			//If one or more intersections,
-			if ( intersects.length > 0 ) {
-				//If a closestIntersected obj (the prev selected obj) exists and its not selected
-				//Restore previous intersection obejct to its original color
-				if (closestIntersected && !closestIntersected.selected)
-					closestIntersected.material.color.setHex(0xffffff);
-				//Store reference to the closest obj as intersection obj
-				closestIntersected = intersects[0].object;
+				//Calculate objects intersecting the picking ray
+				intersects = raycaster.intersectObjects( groupCubes.children );
+				//If one or more intersections,
+				if ( intersects.length > 0 ) {
+					//If a closestIntersected obj (the prev selected obj) exists and its not selected
+					//Restore previous intersection obejct to its original color
+					if (closestIntersected && !closestIntersected.selected)
+						closestIntersected.material.color.setHex(0xffffff);
+					//Store reference to the closest obj as intersection obj
+					closestIntersected = intersects[0].object;
 
-				if (!closestIntersected.selected){
-					//Store current color of closest intersection obj
-					closestIntersected.currentHex = closestIntersected.material.color.getHex();
-					//Make the closest object red						
-					intersects[0].object.material.color.set(0xff0000);
+					if (!closestIntersected.selected){
+						//Store current color of closest intersection obj
+						closestIntersected.currentHex = closestIntersected.material.color.getHex();
+						//Make the closest object red						
+						intersects[0].object.material.color.set(0xff0000);
+					}
+					
 				}
-				
-			}
-			else {
-				if (closestIntersected && !closestIntersected.selected)
-					closestIntersected.material.color.setHex(0xffffff);
-				//Remove previous reference
-				closestIntersected = null;
-				
+				else {
+					if (closestIntersected && !closestIntersected.selected)
+						closestIntersected.material.color.setHex(0xffffff);
+					//Remove previous reference
+					closestIntersected = null;
+					
+				}
 			}
 		}
 
@@ -471,7 +481,7 @@
 			}
 		});
 
-		mouseDraggingBool = false;
+		
 
 		document.addEventListener("click", event => {
 			if (!mouseDraggingBool && closestIntersected && !closestIntersected.selected){
@@ -511,11 +521,13 @@
 
 		//Code for dragging on mouse and Desktop (credit to shaun)
 		document.addEventListener("mousedown", event => {
-			previousX = event.pageX;
-			previousY = event.pageY;
-			
-			document.onmousemove = event => {
-				mouseMoveFunction(event);
+			if (!mouseDraggingBool && gameStartBool){
+				previousX = event.pageX;
+				previousY = event.pageY;
+				
+				document.onmousemove = event => {
+					mouseMoveFunction(event);
+				}
 			}
 		})
 
