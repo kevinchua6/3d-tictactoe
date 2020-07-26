@@ -494,6 +494,20 @@
 			}
 		})
 
+		// For mobile
+		document.addEventListener("touchstart", event => {
+			let touch = event.touches[0];
+			previousX = touch.pageX;
+			previousY = touch.pageY;
+			document.ontouchmove = event => {
+				mouseMoveFunction(event.touches[0]);
+			}
+		})
+
+		document.addEventListener("touchend", e => {
+			document.ontouchmove = null;
+		})
+
 		function finalizeSelection(){
 				//This code finalizes the selection when clicking while hovering over it
 				if (!mouseDraggingBool && closestIntersected && !closestIntersected.selected){
