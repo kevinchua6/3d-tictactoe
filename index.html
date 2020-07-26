@@ -96,6 +96,8 @@
 
 		//Note, add the rotating camera with the mouse later, do the highlighting first
 		// Define all winning placements
+
+		//NOTE: Current bugs: when the cube is rotated once, both mouse movements and keyboard controls will be opposite of the turning direction
 		
 		var paths = [];      
 		
@@ -190,7 +192,9 @@
 		let intersects;
 		let wheelNumber = 0;
 		
-		
+		//vars to handle dragging controls
+		let previousX, previousY;
+
 		//ai
 		var computerSelection;
 
@@ -228,30 +232,6 @@
 			groupCubes = new THREE.Group();
 			scene.add(groupCubes);
 
-			//Creates 27 cubes
-			for (var x=-1; x<=1; x++){
-				for (var y=-1; y<=1; y++){
-					for (var z=-1; z<=1; z++){
-						//every cube would be in a dict, with key representing its placement (must be minus cause its from the origin, but thats not the start of the cube)
-						cubesDict["["+(x+1)+","+(y+1)+","+(z+1)+"]"] = createCubeWithWireframe(2/3,x*2/3,y*2/3,z*2/3);
-					}
-				}
-			}
-
-			for (const[key,cube] of Object.entries(cubesDict)) {
-				groupCubes.add(cube);
-			}
-			
-
-			//Create a directional light
-			const light = new THREE.DirectionalLight( 0xffffff, 8.0 );
-
-			//Move the light back and up a bit
-			light.position.set( 5, 5, 5);
-
-			//Add light to scene
-			scene.add( light );
-			
 			function createCubeWithWireframe(length, posx, posy, posz){
 				//create a geometry
 				const geometry = new THREE.BoxBufferGeometry( length, length, length );
@@ -284,73 +264,37 @@
 				return (cube);
 			}
 
+			//Creates 27 cubes
+			for (var x=-1; x<=1; x++){
+				for (var y=-1; y<=1; y++){
+					for (var z=-1; z<=1; z++){
+						//every cube would be in a dict, with key representing its placement (must be minus cause its from the origin, but thats not the start of the cube)
+						cubesDict["["+(x+1)+","+(y+1)+","+(z+1)+"]"] = createCubeWithWireframe(2/3,x*2/3,y*2/3,z*2/3);
+					}
+				}
+			}
+
+			for (const[key,cube] of Object.entries(cubesDict)) {
+				groupCubes.add(cube);
+			}
+			
+
+			//Create a directional light
+			const light = new THREE.DirectionalLight( 0xffffff, 8.0 );
+
+			//Move the light back and up a bit
+			light.position.set( 5, 5, 5);
+
+			//Add light to scene
+			scene.add( light );
+			
+
+
 			// window.addEventListener('resize', function() {
 			// 	renderer.setSize(window.outerWidth, window.outerHeight);
 			// });
 
-			document.addEventListener("keydown", function(event) {
-				event.preventDefault();
-				const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
-				
-				switch (key) { // change to event.key to key to use the above variable
-					case "a":
-					case "ArrowLeft":{ 
-						// Left pressed
-						isLeftKeyDown = true;
-						break;
-					}
-					case "d":
-					case "ArrowRight": {
-						// Right pressed
-						isRightKeyDown = true;
-						break;
-					}
-					case "w":
-					case "ArrowUp": {
-						// Up pressed
-						isUpKeyDown = true;
-						break;
-					}
-					case "s":
-					case "ArrowDown": {
-						// Down pressed
-						isDownKeyDown = true;
-						break;
-					}
-				}
-			});
 
-			document.addEventListener("keyup", function(event) {
-				event.preventDefault();
-				const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
-				
-				switch (key) { // change to event.key to key to use the above variable
-					case "a":
-					case "ArrowLeft":{ 
-						// Left pressed
-						isLeftKeyDown = false;
-						break;
-					}
-					case "d":
-					case "ArrowRight": {
-						// Right pressed
-						isRightKeyDown = false;
-						break;
-					}
-					case "w":
-					case "ArrowUp": {
-						// Up pressed
-						isUpKeyDown = false;
-						break;
-					}
-					case "s":
-					case "ArrowDown": {
-						// Down pressed
-						isDownKeyDown = false;
-						break;
-					}
-				}
-			});
 		}
 
 		function animate() {
@@ -358,6 +302,71 @@
 			renderer.render( scene, camera );
 			handleKeys();
 		};
+
+		// Controls
+		document.addEventListener("keydown", function(event) {
+			event.preventDefault();
+			const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
+			
+			switch (key) { // change to event.key to key to use the above variable
+				case "a":
+				case "ArrowLeft":{ 
+					// Left pressed
+					isLeftKeyDown = true;
+					break;
+				}
+				case "d":
+				case "ArrowRight": {
+					// Right pressed
+					isRightKeyDown = true;
+					break;
+				}
+				case "w":
+				case "ArrowUp": {
+					// Up pressed
+					isUpKeyDown = true;
+					break;
+				}
+				case "s":
+				case "ArrowDown": {
+					// Down pressed
+					isDownKeyDown = true;
+					break;
+				}
+			}
+		});
+
+		document.addEventListener("keyup", function(event) {
+			event.preventDefault();
+			const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
+			
+			switch (key) { // change to event.key to key to use the above variable
+				case "a":
+				case "ArrowLeft":{ 
+					// Left pressed
+					isLeftKeyDown = false;
+					break;
+				}
+				case "d":
+				case "ArrowRight": {
+					// Right pressed
+					isRightKeyDown = false;
+					break;
+				}
+				case "w":
+				case "ArrowUp": {
+					// Up pressed
+					isUpKeyDown = false;
+					break;
+				}
+				case "s":
+				case "ArrowDown": {
+					// Down pressed
+					isDownKeyDown = false;
+					break;
+				}
+			}
+		});
 
 		document.addEventListener('mousemove', function() {
 			//update wheel number
@@ -400,8 +409,9 @@
 				
 			}
 		}
+
 		//note: 0xff0000 red, 0xffffff white, 0x00ff00 green
-		window.addEventListener("wheel", event => {
+		document.addEventListener("wheel", event => {
 			const delta = Math.sign(event.deltaY);
 			//console.info(delta);
 			if ( intersects.length > 1 && !stop){
@@ -461,8 +471,10 @@
 			}
 		});
 
-		window.addEventListener("click", event => {
-			if (closestIntersected && !closestIntersected.selected){
+		mouseDraggingBool = false;
+
+		document.addEventListener("click", event => {
+			if (!mouseDraggingBool && closestIntersected && !closestIntersected.selected){
 				closestIntersected.selected = 'you';
 				//Check if you win after the selection is confirmed				
 				if (checkWin('you') && !stop){
@@ -496,6 +508,35 @@
 				}
 			}
 		});
+
+		//Code for dragging on mouse and Desktop (credit to shaun)
+		document.addEventListener("mousedown", event => {
+			previousX = event.pageX;
+			previousY = event.pageY;
+			
+			document.onmousemove = event => {
+				mouseMoveFunction(event);
+			}
+		})
+
+		document.addEventListener("mouseup", event => {
+			document.onmousemove = null;
+			mouseDraggingBool = false;
+		})
+
+		let rotationSensitivity = 0.003
+
+		function mouseMoveFunction(event) {
+			mouseDraggingBool = true;
+
+			groupCubes.rotation.x += rotationSensitivity * (event.pageY - previousY);
+			groupCubes.rotation.y += rotationSensitivity * (event.pageX - previousX);
+
+			previousX = event.pageX;
+			previousY = event.pageY;
+
+
+		}
 
 		function stalemate(){
 			stop = true;
