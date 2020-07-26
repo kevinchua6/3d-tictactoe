@@ -387,7 +387,7 @@
 		mouseDraggingBool = false;
 
 		function update(){
-				if (!mouseDraggingBool){
+			if (!mouseDraggingBool){
 				//Update the picking ray with the camera and mouse position
 				raycaster.setFromCamera( mouse, camera );
 
@@ -417,6 +417,7 @@
 					closestIntersected = null;
 					
 				}
+				
 			}
 		}
 
@@ -481,10 +482,21 @@
 			}
 		});
 
-		
+		//Code for dragging on mouse and Desktop (credit to shaun)
+		document.addEventListener("mousedown", event => {
+			if (!mouseDraggingBool && gameStartBool){
+				previousX = event.pageX;
+				previousY = event.pageY;
+				
+				document.onmousemove = event => {
+					mouseMoveFunction(event);
+				}
+			}
+		})
 
-		document.addEventListener("click", event => {
-			if (!mouseDraggingBool && closestIntersected && !closestIntersected.selected){
+		function finalizeSelection(){
+				//This code finalizes the selection when clicking while hovering over it
+				if (!mouseDraggingBool && closestIntersected && !closestIntersected.selected){
 				closestIntersected.selected = 'you';
 				//Check if you win after the selection is confirmed				
 				if (checkWin('you') && !stop){
@@ -517,21 +529,11 @@
 					return;
 				}
 			}
-		});
-
-		//Code for dragging on mouse and Desktop (credit to shaun)
-		document.addEventListener("mousedown", event => {
-			if (!mouseDraggingBool && gameStartBool){
-				previousX = event.pageX;
-				previousY = event.pageY;
-				
-				document.onmousemove = event => {
-					mouseMoveFunction(event);
-				}
-			}
-		})
+		}
 
 		document.addEventListener("mouseup", event => {
+			finalizeSelection()
+
 			document.onmousemove = null;
 			mouseDraggingBool = false;
 		})
