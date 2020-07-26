@@ -505,7 +505,9 @@
 		})
 
 		document.addEventListener("touchend", e => {
+			finalizeSelection()
 			document.ontouchmove = null;
+			mouseDraggingBool = false;
 		})
 
 		function finalizeSelection(){
