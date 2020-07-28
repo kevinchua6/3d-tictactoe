@@ -82,6 +82,7 @@
 			<button id="newGameButton" type="button">New Game</button>
 		</div>
 		<script src="js/three.js"></script>
+		<script src="js/controls.js"></script>
 		<script>
 
 		//gamestart var
@@ -92,8 +93,6 @@
 			//Start game
 			//Set everything up
 			init()
-			//Animate it
-			animate();
 			document.querySelector( '#startGameButton' ).remove();
 			document.querySelector( '.centerTitle' ).remove();
 		});
@@ -196,14 +195,8 @@
 		let intersects;
 		let wheelNumber = 0;
 		
-		//vars to handle dragging controls
-		let previousX, previousY;
-
 		//ai
 		var computerSelection;
-
-
-
 
 		function init() {
 			// Get a reference to the container that will hold our scene (this will be the entire window)
@@ -299,220 +292,24 @@
 			// });
 
 
+
+
+			function animate() {
+				requestAnimationFrame( animate );
+				renderer.render( scene, camera );
+				handleKeys();
+			};
+
+			//Animate it
+			animate();
+
 		}
 
-		function animate() {
-			requestAnimationFrame( animate );
-			renderer.render( scene, camera );
-			handleKeys();
-		};
 
-		// Controls
-		document.addEventListener("keydown", function(event) {
-			event.preventDefault();
-			const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
-			
-			switch (key) { // change to event.key to key to use the above variable
-				case "a":
-				case "ArrowLeft":{ 
-					// Left pressed
-					isLeftKeyDown = true;
-					break;
-				}
-				case "d":
-				case "ArrowRight": {
-					// Right pressed
-					isRightKeyDown = true;
-					break;
-				}
-				case "w":
-				case "ArrowUp": {
-					// Up pressed
-					isUpKeyDown = true;
-					break;
-				}
-				case "s":
-				case "ArrowDown": {
-					// Down pressed
-					isDownKeyDown = true;
-					break;
-				}
-			}
-		});
-
-		document.addEventListener("keyup", function(event) {
-			event.preventDefault();
-			const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
-			
-			switch (key) { // change to event.key to key to use the above variable
-				case "a":
-				case "ArrowLeft":{ 
-					// Left pressed
-					isLeftKeyDown = false;
-					break;
-				}
-				case "d":
-				case "ArrowRight": {
-					// Right pressed
-					isRightKeyDown = false;
-					break;
-				}
-				case "w":
-				case "ArrowUp": {
-					// Up pressed
-					isUpKeyDown = false;
-					break;
-				}
-				case "s":
-				case "ArrowDown": {
-					// Down pressed
-					isDownKeyDown = false;
-					break;
-				}
-			}
-		});
-
-		document.addEventListener('mousemove', function() {
-			if (gameStartBool){
-				//update wheel number
-				wheelNumber = 0
-				//Calculate mouse position in normalized device coordinates
-				// (-1 to +1) for both components
-				mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-				mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-				update()
-			}
-		}, false);
-
-		mouseDraggingBool = false;
-
-		function update(){
-			if (!mouseDraggingBool){
-				//Update the picking ray with the camera and mouse position
-				raycaster.setFromCamera( mouse, camera );
-
-				//Calculate objects intersecting the picking ray
-				intersects = raycaster.intersectObjects( groupCubes.children );
-				//If one or more intersections,
-				if ( intersects.length > 0 ) {
-					//If a closestIntersected obj (the prev selected obj) exists and its not selected
-					//Restore previous intersection obejct to its original color
-					if (closestIntersected && !closestIntersected.selected)
-						closestIntersected.material.color.setHex(0xffffff);
-					//Store reference to the closest obj as intersection obj
-					closestIntersected = intersects[0].object;
-
-					if (!closestIntersected.selected){
-						//Store current color of closest intersection obj
-						closestIntersected.currentHex = closestIntersected.material.color.getHex();
-						//Make the closest object red						
-						intersects[0].object.material.color.set(0xff0000);
-					}
-					
-				}
-				else {
-					if (closestIntersected && !closestIntersected.selected)
-						closestIntersected.material.color.setHex(0xffffff);
-					//Remove previous reference
-					closestIntersected = null;
-					
-				}
-				
-			}
-		}
-
-		//note: 0xff0000 red, 0xffffff white, 0x00ff00 green
-		document.addEventListener("wheel", event => {
-			const delta = Math.sign(event.deltaY);
-			//console.info(delta);
-			if ( intersects.length > 1 && !stop){
-				//If scrolling up
-				if (delta == -1){
-					//eg if intersects.length = 2, wheelNumber would only go up to 1
-					if (wheelNumber < intersects.length - 1) {
-						wheelNumber += 1;
-						//If the selected one is white (not green), change the current block to red
-						if (intersects[wheelNumber].object.material.color.getHexString() == 'ffffff'){
-							intersects[wheelNumber].object.material.color.set(0xff0000);
-						}
-						
-						//Set current selected red back to its normal color and remove the previous reference
-						if (closestIntersected && !closestIntersected.selected)
-							closestIntersected.material.color.setHex(0xffffff);
-						//Store currently selected to closestIntersected 
-						closestIntersected = intersects[wheelNumber].object;
-						
-					}
-					else if (wheelNumber == intersects.length - 1){
-						wheelNumber = 0;
-						if (intersects[wheelNumber].object.material.color.getHexString() == 'ffffff'){
-							intersects[wheelNumber].object.material.color.set(0xff0000);
-						}
-						//Set current selected red back to its normal color and remove the previous reference
-						if (closestIntersected && !closestIntersected.selected)
-							closestIntersected.material.color.setHex(0xffffff);
-						closestIntersected = intersects[wheelNumber].object;
-						
-					}
-				}
-				//If scrolling down
-				else if (delta == 1){
-					if (wheelNumber > 0){
-						wheelNumber -=1;
-						if (intersects[wheelNumber].object.material.color.getHexString() == 'ffffff'){
-							intersects[wheelNumber].object.material.color.set(0xff0000);
-							
-						}
-						//Set current selected red back to its normal color and remove the previous reference
-						if (closestIntersected && !closestIntersected.selected)
-							closestIntersected.material.color.setHex(0xffffff);
-						closestIntersected = intersects[wheelNumber].object;
-					}
-					else if (wheelNumber == 0) {
-						wheelNumber = intersects.length -1;
-						if (intersects[wheelNumber].object.material.color.getHexString() == 'ffffff'){
-							intersects[wheelNumber].object.material.color.set(0xff0000);
-						}
-						//Set current selected red back to its normal color (white) and remove the previous reference
-						if (closestIntersected && !closestIntersected.selected)
-							closestIntersected.material.color.setHex(0xffffff);
-						closestIntersected = intersects[wheelNumber].object;
-					}
-				}
-			}
-		});
-
-		//Code for dragging on mouse and Desktop (credit to shaun)
-		document.addEventListener("mousedown", event => {
-			if (!mouseDraggingBool && gameStartBool){
-				previousX = event.pageX;
-				previousY = event.pageY;
-				
-				document.onmousemove = event => {
-					mouseMoveFunction(event);
-				}
-			}
-		})
-
-		// For mobile
-		document.addEventListener("touchstart", event => {
-			let touch = event.touches[0];
-			previousX = touch.pageX;
-			previousY = touch.pageY;
-			document.ontouchmove = event => {
-				mouseMoveFunction(event.touches[0]);
-			}
-		})
-
-		document.addEventListener("touchend", e => {
-			finalizeSelection()
-			document.ontouchmove = null;
-			mouseDraggingBool = false;
-		})
 
 		function finalizeSelection(){
-				//This code finalizes the selection when clicking while hovering over it
-				if (!mouseDraggingBool && closestIntersected && !closestIntersected.selected){
+			//This code finalizes the selection when clicking while hovering over it
+			if (!mouseDraggingBool && closestIntersected && !closestIntersected.selected){
 				closestIntersected.selected = 'you';
 				//Check if you win after the selection is confirmed				
 				if (checkWin('you') && !stop){
@@ -526,9 +323,113 @@
 				//That means that a variable for each object is required to show whether it can turn back to its normal color or not
 				//ie, closestintersected.selected
 
-				//Check if theres a winning play, if no, check if opponent has a winning play, if not do a random move.
-				if (!checkWinnnablePlayCom() && !stop){
-					if (!checkWinnablePlayYou() && !stop){
+				//Check if theres a winning play for com, if no, check if player has a winning play, if not do a random move.
+
+				function randomMoveCom(){
+					//Does a move for the computer which is a random space on the tic tac toe board which is not a move already on the board
+					//Get a list of all available squares ie all the squares that do not have groupCubes.children[6].selected
+					let squaresAvailableArray = [];
+						for (var i=0; i<27; i++){
+							if (!groupCubes.children[i].selected){
+								squaresAvailableArray.push(groupCubes.children[i]);
+							}
+						}
+						//Moves computer if there is available space left
+						if (squaresAvailableArray.length > 0){
+							let computerSelectionInt = randomInteger(0, squaresAvailableArray.length - 1 );
+							computerSelection = squaresAvailableArray[computerSelectionInt];
+							computerSelection.material.color.set(0x00ff00);
+							computerSelection.selected = 'com';
+							return true;
+						}
+						else {
+							return false;
+						}
+				}
+
+				function checkWinnnablePlayCom(){
+					for (var i=0;i<27;i++){
+						//If not selected
+						if (!groupCubes.children[i].selected){
+							groupCubes.children[i].selected = 'com';
+							if (checkWin('com')){
+								//If its a winnable play, do it
+								groupCubes.children[i].material.color.set(0x00ff00);
+								groupCubes.children[i].selected = 'com';
+								//console.log('color set!')
+								return true;
+							}
+							groupCubes.children[i].selected = null;
+						}
+					}
+				}
+
+				function checkWinnablePlayYou(){
+					for (var i=0;i<27;i++){
+						//If not selected
+						if (!groupCubes.children[i].selected){
+							groupCubes.children[i].selected = 'you';
+							if (checkWin('you')){
+								//If its a winnable play, block it
+								groupCubes.children[i].material.color.set(0x00ff00);
+								groupCubes.children[i].selected = 'com';
+								return true;
+							}
+							groupCubes.children[i].selected = null;
+						}
+					}
+				}
+
+				function randomInteger(min, max) {
+					return Math.floor(Math.random() * (max - min + 1)) + min;
+				}
+
+				function checkWin(player){
+					//player is a string which only accepts 'you' or 'com'
+					for (var i=0; i<paths.length;i++){
+						var firstWin = paths[i][0];
+						var secondWin = paths[i][1];
+						var thirdWin = paths[i][2];
+
+						//Convert arrays to string
+						var firstWinString = JSON.stringify( firstWin );
+						//console.log(firstWinString)
+						var secondWinString = JSON.stringify( secondWin );
+						var thirdWinString = JSON.stringify( thirdWin );
+
+						//assuming cubes is a dictionary with key [0,0,0], value <cube object>
+						//cubes = {"[0,0,0]": <cube object>, ...}
+						//Check that all of them are equal to that color
+						if (cubesDict[firstWinString].selected == player 
+						&& cubesDict[secondWinString].selected == player
+						&& cubesDict[thirdWinString].selected == player){
+							return (true);
+						}
+					}
+
+					// function isColorAtBox(i, color){
+					// 	//gets Hex color in string of i, the cube number
+					// 	return (groupCubes.children[i].material.color.getHexString() == color);
+					// }
+				}
+
+				function stopGame(){
+					//Stops all selections from happening
+					for (var i=0;i<27;i++){
+						groupCubes.children[i].selected = true;
+					}
+				};
+
+				function stalemate(){
+					stop = true;
+					document.getElementById("dialogDiv").style.display = 'inline';
+					document.getElementById("dialogText").innerHTML = "It's a stalemate.";
+					stopGame();
+				};
+
+
+				if (!stop && !checkWinnnablePlayCom()){
+					if (!stop && !checkWinnablePlayYou()){
 						if (!randomMoveCom()) {
 							stalemate();
 							return;
@@ -547,33 +448,6 @@
 			}
 		}
 
-		document.addEventListener("mouseup", event => {
-			finalizeSelection()
-
-			document.onmousemove = null;
-			mouseDraggingBool = false;
-		})
-
-		let rotationSensitivity = 0.003
-
-		function mouseMoveFunction(event) {
-			mouseDraggingBool = true;
-
-			groupCubes.rotation.x += rotationSensitivity * (event.pageY - previousY);
-			groupCubes.rotation.y += rotationSensitivity * (event.pageX - previousX);
-
-			previousX = event.pageX;
-			previousY = event.pageY;
-
-
-		}
-
-		function stalemate(){
-			stop = true;
-			document.getElementById("dialogDiv").style.display = 'inline';
-			document.getElementById("dialogText").innerHTML = "It's a stalemate.";
-			stopGame();
-		};
 
 		document.getElementById("newGameButton").addEventListener("click", function() {
 			//new game
@@ -585,118 +459,10 @@
 			stop = false;
 		});
 
-		function stopGame(){
-			//Stops all selections from happening
-			for (var i=0;i<27;i++){
-				groupCubes.children[i].selected = true;
-			}
-		};
 
-		function randomMoveCom(){
-			//Get a list of all available squares ie all the squares that do not have groupCubes.children[6].selected
-			let squaresAvailableArray = [];
-				for (var i=0; i<27; i++){
-					if (!groupCubes.children[i].selected){
-						squaresAvailableArray.push(groupCubes.children[i]);
-					}
-				}
-				//Moves computer if there is available space left
-				if (squaresAvailableArray.length > 0){
-					let computerSelectionInt = randomInteger(0, squaresAvailableArray.length - 1 );
-					computerSelection = squaresAvailableArray[computerSelectionInt];
-					computerSelection.material.color.set(0x00ff00);
-					computerSelection.selected = 'com';
-					return true;
-				}
-				else {
-					return false;
-				}
-		}
 
-		function checkWinnnablePlayCom(){
-			for (var i=0;i<27;i++){
-				//If not selected
-				if (!groupCubes.children[i].selected){
-					groupCubes.children[i].selected = 'com';
-					if (checkWin('com')){
-						//If its a winnable play, do it
-						groupCubes.children[i].material.color.set(0x00ff00);
-						groupCubes.children[i].selected = 'com';
-						//console.log('color set!')
-						return true;
-					}
-					groupCubes.children[i].selected = null;
-				}
-			}
-		}
 
-		function checkWinnablePlayYou(){
-			for (var i=0;i<27;i++){
-				//If not selected
-				if (!groupCubes.children[i].selected){
-					groupCubes.children[i].selected = 'you';
-					if (checkWin('you')){
-						//If its a winnable play, block it
-						groupCubes.children[i].material.color.set(0x00ff00);
-						groupCubes.children[i].selected = 'com';
-						return true;
-					}
-					groupCubes.children[i].selected = null;
-				}
-			}
-		}
 
-		function randomInteger(min, max) {
-			return Math.floor(Math.random() * (max - min + 1)) + min;
-		}
-
-		function checkWin(player){
-			//player is a string which only accepts 'you' or 'com'
-			for (var i=0; i<paths.length;i++){
-				var firstWin = paths[i][0];
-				var secondWin = paths[i][1];
-				var thirdWin = paths[i][2];
-
-				//Convert arrays to string
-				var firstWinString = JSON.stringify( firstWin );
-				//console.log(firstWinString)
-				var secondWinString = JSON.stringify( secondWin );
-				var thirdWinString = JSON.stringify( thirdWin );
-
-				//assuming cubes is a dictionary with key [0,0,0], value <cube object>
-				//cubes = {"[0,0,0]": <cube object>, ...}
-				//Check that all of them are equal to that color
-				if (cubesDict[firstWinString].selected == player 
-				&& cubesDict[secondWinString].selected == player
-				&& cubesDict[thirdWinString].selected == player){
-					return (true);
-				}
-			}
-
-			// function isColorAtBox(i, color){
-			// 	//gets Hex color in string of i, the cube number
-			// 	return (groupCubes.children[i].material.color.getHexString() == color);
-			// }
-		}
-
-		function handleKeys() {
-			if (isLeftKeyDown == true) {
-				//Iterates through all the values of cubes dict
-				groupCubes.rotation.y -= speed;
-			}
-			if (isRightKeyDown == true) {
-				groupCubes.rotation.y += speed;
-				
-			}
-			if (isUpKeyDown == true) {
-				groupCubes.rotation.x -= speed;
-				
-			}
-			if (isDownKeyDown == true) {
-				groupCubes.rotation.x += speed;
-				
-			}
-		};
 
 		</script>
 	</body>
