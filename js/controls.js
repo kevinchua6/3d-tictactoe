@@ -65,7 +65,7 @@ document.addEventListener("keyup", function(event) {
             // Down pressed
             isDownKeyDown = false;
             break;
-        }
+        }  
     }
 });
 
@@ -97,6 +97,8 @@ document.addEventListener('mousemove', function() {
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         update()
+
+
     }
 }, false);
 
@@ -196,16 +198,27 @@ document.addEventListener("wheel", event => {
     }
 });
 
+let mousePositionDown = {x:0, y:0};
+let mousePositionUp = {x:0, y:0};
+
 //Code for dragging on mouse and Desktop (credit to shaun)
 document.addEventListener("mousedown", event => {
     if (!mouseDraggingBool && gameStartBool){
         previousX = event.pageX;
         previousY = event.pageY;
         
+        mousePositionDown.x = event.pageX;
+        mousePositionDown.y = event.pageY;
+
+        console.log("Down")
+        console.log(mousePositionDown.x ,mousePositionDown.y)
+
         document.onmousemove = event => {
             mouseMoveFunction(event);
         }
     }
+
+
 })
 
 // For mobile
@@ -225,7 +238,17 @@ document.addEventListener("touchend", e => {
 })
 
 document.addEventListener("mouseup", event => {
-    finalizeSelection()
+    mousePositionUp.x = event.pageX;
+    mousePositionUp.y = event.pageY;
+
+    console.log ("up")
+    console.log (mousePositionUp.x,mousePositionUp.y)
+    console.log((Math.abs(mousePositionDown.x - mousePositionUp.x) < 10) &&  (Math.abs(mousePositionDown.y - mousePositionUp.y) < 10));
+
+    // Create a condition so that if the diff is > than smth then enable this
+    if ( (Math.abs(mousePositionDown.x - mousePositionUp.x) < 10) &&  (Math.abs(mousePositionDown.y - mousePositionUp.y) < 10) ){
+        finalizeSelection()
+    }
     document.onmousemove = null;
     mouseDraggingBool = false;
 })

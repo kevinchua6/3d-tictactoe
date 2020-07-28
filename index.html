@@ -56,13 +56,13 @@
 
 			#dialogText { 
 				margin-left: 17px;
-				margin-top: 5.5px; 
+				margin-top: 5px; 
 			}
 
 			#newGameButton { 
 				position: relative,;
 				float: right; 
-				margin-top: -20.5px;
+				margin-top: -25px;
 				margin-right: 8px;
 			}
 
@@ -287,11 +287,9 @@
 
 		}
 
-
-
 		function finalizeSelection(){
 			//This code finalizes the selection when clicking while hovering over it, and contains the logic for AI and win conditions
-			if (!mouseDraggingBool && closestIntersected && !closestIntersected.selected){
+			if ( closestIntersected && !closestIntersected.selected){
 				closestIntersected.selected = 'you';
 				//Check if you win after the selection is confirmed				
 				if (checkWin('you') && !stop){
