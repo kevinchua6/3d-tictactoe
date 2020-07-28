@@ -83,21 +83,9 @@
 		</div>
 		<script src="js/three.js"></script>
 		<script src="js/controls.js"></script>
+		<script src="js/title.js"></script>
 		<script>
-
-		//gamestart var
-		let gameStartBool = false;
-
-		document.getElementById("startGameButton").addEventListener("click", function() {
-			gameStartBool = true;
-			//Start game
-			//Set everything up
-			init()
-			document.querySelector( '#startGameButton' ).remove();
-			document.querySelector( '.centerTitle' ).remove();
-		});
-
-		//Note, add the rotating camera with the mouse later, do the highlighting first
+		// Note, add the rotating camera with the mouse later, do the highlighting first
 		// Define all winning placements
 
 		//NOTE: Current bugs: when the cube is rotated once, both mouse movements and keyboard controls will be opposite of the turning direction
@@ -274,7 +262,6 @@
 			for (const[key,cube] of Object.entries(cubesDict)) {
 				groupCubes.add(cube);
 			}
-			
 
 			//Create a directional light
 			const light = new THREE.DirectionalLight( 0xffffff, 8.0 );
@@ -284,15 +271,10 @@
 
 			//Add light to scene
 			scene.add( light );
-			
-
 
 			// window.addEventListener('resize', function() {
 			// 	renderer.setSize(window.outerWidth, window.outerHeight);
 			// });
-
-
-
 
 			function animate() {
 				requestAnimationFrame( animate );
@@ -308,7 +290,7 @@
 
 
 		function finalizeSelection(){
-			//This code finalizes the selection when clicking while hovering over it
+			//This code finalizes the selection when clicking while hovering over it, and contains the logic for AI and win conditions
 			if (!mouseDraggingBool && closestIntersected && !closestIntersected.selected){
 				closestIntersected.selected = 'you';
 				//Check if you win after the selection is confirmed				
@@ -447,23 +429,6 @@
 				}
 			}
 		}
-
-
-		document.getElementById("newGameButton").addEventListener("click", function() {
-			//new game
-			document.getElementById("dialogDiv").style.display = 'none';
-			for (var i=0;i<27;i++){
-				groupCubes.children[i].selected = null;
-				groupCubes.children[i].material.color.set(0xffffff);
-			}
-			stop = false;
-		});
-
-
-
-
-
-
 		</script>
 	</body>
 </html>
