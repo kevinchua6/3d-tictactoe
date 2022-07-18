@@ -1,1 +1,1 @@
-https://yourally2.github.io/3d-tictactoe/
+https://kevinchua6.github.io/3d-tictactoe/
